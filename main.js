@@ -105,7 +105,7 @@ bot.on('messageCreate', async function (msg) {
             case 'thx':
                 await bot.sendChannelTyping(msg.channel.id)
                 await updateNick(msg);
-                output = jsons['103347843934212096'][getRandomInt(0, cat.length - 1)];
+                output = jsons['103347843934212096'].lines[getRandomInt(0, cat.length - 1)];
                 output = filterUrls(output);
                 console.log(output);
                 output = await filterMentions(output);
