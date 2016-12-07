@@ -54,6 +54,8 @@ bot.on('ready', () => {
 
 bot.on('messageCreate', async function (msg) {
     var prefix = config.isbeta ? 'catbeta' : 'cat';
+    var suffix = config.isbeta ? 'betapls' : 'pls';
+    
     if (msg.content.startsWith(prefix)) {
         await updateNick(msg);
         var command = msg.content.replace(prefix, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
@@ -124,6 +126,13 @@ bot.on('messageCreate', async function (msg) {
                     markovPerson(msg, nameIdMap[commandName]);
                 }
                 break;
+        }
+    } else if (msg.content.toLowerCase().endsWith('pls')) {
+        for (let key of Object.keys(nameIdMap)) {
+            if (msg.content.toLowerCase().startsWith(key)) {
+                markovPerson(msg, nameIdMap[key]);
+                break;
+            }
         }
     }
 });
