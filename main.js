@@ -55,12 +55,21 @@ bot.on('ready', () => {
 bot.on('messageCreate', async function (msg) {
     var prefix = config.isbeta ? 'catbeta' : 'cat';
     if (msg.content.startsWith(prefix)) {
+        await updateNick(msg);
         var command = msg.content.replace(prefix, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
         console.log('stupid cat>', msg.author.username, msg.author.id, prefix, command);
         var words = command.split(' ');
         let output;
         let commandName = words.shift().toLowerCase()
         switch (commandName) {
+            case 'list':
+                let nameList = [];
+                for (let key of Object.keys(nameIdMap)) {
+                    let user = await getUser(nameIdMap[key]);
+                    nameList.push(`**${key}** (${user.username}#${user.discriminator})`);
+                }
+                bot.createMessage(msg.channel.id, `I've markoved the following people:\n - ${nameList.join('\n - ')}`)
+                break;
             case 'ping':
                 bot.createMessage(msg.channel.id, 'What is that supposed to mean?');
                 break;
@@ -104,7 +113,6 @@ bot.on('messageCreate', async function (msg) {
                 break;
             case 'thx':
                 await bot.sendChannelTyping(msg.channel.id)
-                await updateNick(msg);
                 output = jsons['103347843934212096'].lines[getRandomInt(0, jsons['103347843934212096'].lines.length - 1)];
                 output = filterUrls(output);
                 console.log(output);
@@ -122,11 +130,15 @@ bot.on('messageCreate', async function (msg) {
 
 bot.connect();
 
+async function getUser(id) {
+    return bot.users.get(id) || await bot.getRESTUser(id);
+}
+
 async function updateNick(msg) {
-    if ((msg.guild.members.get(CAT_ID).nick || bot.users.get(CAT_ID).username) !==
+    if ((msg.guild.members.get(CAT_ID).nick || bot.users.get(CAT_ID).username).substring(1) !==
         (msg.guild.members.get(bot.user.id).nick || bot.user.username)) {
         try {
-            await bot.editNickname(msg.guild.id, msg.guild.members.get(CAT_ID).nick || bot.user.username);
+            await bot.editNickname(msg.guild.id, (msg.guild.members.get(CAT_ID).nick || bot.user.username).substring(1));
         } catch (err) {
             console.log('Failed to change nickname on ' + msg.guild.name + ` (${msg.guild.id})`);
         }
@@ -190,7 +202,7 @@ async function filterMentions(message) {
     while (/<@!?[0-9]{17,21}>/.test(message)) {
         let id = message.match(/<@!?([0-9]{17,21})>/)[1];
         try {
-            let user = bot.users.get(id) || await bot.getRESTUser(id);
+            let user = await getUser(id);
             message = message.replace(new RegExp(`<@!?${id}>`), `${user.username}#${user.discriminator}`);
         } catch (err) {
             message = message.replace(new RegExp(`<@!?${id}>`), `<@\u200b${id}>`);
@@ -200,7 +212,7 @@ async function filterMentions(message) {
 };
 
 async function markovPerson(msg, id, clean) {
-    let user = bot.users.get(id) || await bot.getRESTUser(id);
+    let user = await getUser(id);
     await bot.sendChannelTyping(msg.channel.id)
     output = markovs[id].say({
         length: 100
