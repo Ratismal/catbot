@@ -405,7 +405,7 @@ function readFile(id) {
             }
             jsons[id] = JSON.parse(file);
             nameIdMap[jsons[id].name] = id;
-            markovs[id] = new Markovify();
+            if (!markovs[id]) markovs[id] = new Markovify();
             markovs[id].buildChain(jsons[id].lines.filter(l => {
                 return !/^[!@#$%\^&/\\;:.><,|=+-\[\]]/.test(l);
             }).join(' \uE000 '));
