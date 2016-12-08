@@ -77,10 +77,11 @@ bot.on('messageCreate', async function (msg) {
                         }
                         await r.db('blargdb').table('markovs').insert({
                             userid: ids,
-                            id: words[1].toLowerCase()
+                            id: words[0].toLowerCase()
                         });
-                        await genlogs(msg, ids, words[0].toLowerCase());
-                        await readFile(ids);
+                        await genlogs(msg, words[0].toLowerCase());
+                        let userId = Array.isArray(ids) ? ids[0] : ids;
+                        await readFile(userId);
                     } else {
                         bot.createMessage(msg.channel.id, 'Nope.');
                     }
@@ -112,7 +113,7 @@ bot.on('messageCreate', async function (msg) {
                                 if (key != 'gus' && key != 'cat') {
                                     let id = nameIdMap[key];
                                     if (id) {
-                                        await genlogs(msg, id, key);
+                                        await genlogs(msg, key);
                                         readFile(id);
                                     }
                                 }
@@ -123,7 +124,7 @@ bot.on('messageCreate', async function (msg) {
                         } else {
                             let id = nameIdMap[words[0].toLowerCase()];
                             if (id) {
-                                await genlogs(msg, id, words[0].toLowerCase());
+                                await genlogs(msg, words[0].toLowerCase());
                                 readFile(id);
                             } else {
                                 bot.createMessage(msg.channel.id, 'Nope.');
@@ -199,7 +200,10 @@ bot.on('messageCreate', async function (msg) {
         }
     } else if (msg.content.toLowerCase().endsWith(suffix)) {
         for (let key of Object.keys(nameIdMap)) {
-            if (msg.content.toLowerCase().startsWith(key)) {
+            let content = msg.content.toLowerCase();
+            content = content.substring(0, content.length - suffix.length).replace(/[\n\s,]+/g);
+            console.log(content, key);
+            if (content == key) {
                 markovPerson(msg, nameIdMap[key]);
                 break;
             }
@@ -348,8 +352,9 @@ async function gencat(msg) {
     });
 }
 
-async function genlogs(msg, id, name) {
+async function genlogs(msg, name) {
     try {
+        let id = (await r.table('markovs').get(name)).userid;
         let msg2 = await bot.createMessage(msg.channel.id, name + ': Performing query...');
         let msgs;
         if (Array.isArray(id)) {
