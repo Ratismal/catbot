@@ -4,6 +4,17 @@ var config = require('./config.json')
 var CAT_ID = '103347843934212096';
 const fs = require('fs');
 const path = require('path');
+process.on("unhandledRejection", function (err) {
+    console.error(err)
+})
+
+const r = require('rethinkdbdash')({
+    host: config.db.host,
+    db: config.db.database,
+    password: config.db.password,
+    user: config.db.user,
+    port: config.db.port
+});
 
 console.log('loading jsons');
 var fileArray = fs.readdirSync(path.join(__dirname, 'jsons'));
@@ -16,19 +27,12 @@ var nameIdMap = {};
 for (var i = 0; i < fileArray.length; i++) {
     var commandFile = fileArray[i];
     var id = commandFile.match(/(\d+)/)[1];
-    jsons[id] = JSON.parse(fs.readFileSync(path.join(__dirname, 'jsons', commandFile)));
-    markovs[id] = new Markovify();
-    nameIdMap[jsons[id].name] = id;
+    readFile(id);
 }
 
 jsons['103347843934212096'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'cat.json')))
 markovs['103347843934212096'] = new Markovify();
-
-
-console.log('building markov')
-for (var key in markovs) {
-    markovs[key].buildChain(jsons[key].lines.join(' \uE000 '));
-}
+markovs['103347843934212096'].buildChain(jsons['103347843934212096'].lines.join(' \uE000 '));
 
 bot = new Eris.Client('Bot ' + config.token, {
     autoReconnect: true,
@@ -55,7 +59,7 @@ bot.on('ready', () => {
 bot.on('messageCreate', async function (msg) {
     var prefix = config.isbeta ? 'catbeta' : 'cat';
     var suffix = config.isbeta ? 'betapls' : 'pls';
-    
+
     if (msg.content.startsWith(prefix)) {
         await updateNick(msg);
         var command = msg.content.replace(prefix, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
@@ -64,6 +68,72 @@ bot.on('messageCreate', async function (msg) {
         let output;
         let commandName = words.shift().toLowerCase()
         switch (commandName) {
+            case 'add':
+                if (msg.author.id == CAT_ID) {
+                    if (msg.mentions.length > 0 && words[0]) {
+                        let ids = msg.mentions.map(u => u.id);
+                        if (ids.length == 1) {
+                            ids = ids[0];
+                        }
+                        await r.db('blargdb').table('markovs').insert({
+                            userid: ids,
+                            id: words[1].toLowerCase()
+                        });
+                        await genlogs(msg, ids, words[0].toLowerCase());
+                        await readFile(ids);
+                    } else {
+                        bot.createMessage(msg.channel.id, 'Nope.');
+                    }
+                }
+                break;
+            case 'remove':
+                if (msg.author.id == CAT_ID) {
+                    if (words[0]) {
+                        await r.db('blargdb').table('markovs').get(words[0].toLowerCase()).delete();
+                        let id = nameIdMap[words[0].toLowerCase()];
+                        if (id) {
+                            delete nameIdMap[jsons[id].name];
+                            delete markovs[id];
+                            delete jsons[id];
+                            fs.unlink(path.join(__dirname, 'jsons', id + '.json'));
+                        }
+                        await bot.createMessage(msg.channel.id, 'Removed.');
+                    } else {
+                        bot.createMessage(msg.channel.id, 'Nope.');
+                    }
+                }
+                break;
+            case 'update':
+                if (msg.author.id == CAT_ID) {
+                    if (words[0]) {
+                        if (words[0].toLowerCase() == 'all') {
+                            for (let key of Object.keys(nameIdMap)) {
+                                console.log(key);
+                                if (key != 'gus' && key != 'cat') {
+                                    let id = nameIdMap[key];
+                                    if (id) {
+                                        await genlogs(msg, id, key);
+                                        readFile(id);
+                                    }
+                                }
+                            }
+                            gencat(msg);
+                        } else if (words[0].toLowerCase() == 'cat') {
+                            gencat(msg);
+                        } else {
+                            let id = nameIdMap[words[0].toLowerCase()];
+                            if (id) {
+                                await genlogs(msg, id, words[0].toLowerCase());
+                                readFile(id);
+                            } else {
+                                bot.createMessage(msg.channel.id, 'Nope.');
+                            }
+                        }
+                    } else {
+                        bot.createMessage(msg.channel.id, 'Nope.');
+                    }
+                }
+                break;
             case 'list':
                 let nameList = [];
                 for (let key of Object.keys(nameIdMap)) {
@@ -127,7 +197,7 @@ bot.on('messageCreate', async function (msg) {
                 }
                 break;
         }
-    } else if (msg.content.toLowerCase().endsWith('pls')) {
+    } else if (msg.content.toLowerCase().endsWith(suffix)) {
         for (let key of Object.keys(nameIdMap)) {
             if (msg.content.toLowerCase().startsWith(key)) {
                 markovPerson(msg, nameIdMap[key]);
@@ -242,4 +312,99 @@ async function markovPerson(msg, id, clean) {
             }
         });
     else bot.createMessage(msg.channel.id, output);
+}
+
+async function gencat(msg) {
+    let msg2 = await bot.createMessage(msg.channel.id, 'cat: Performing query...');
+    let msgs;
+    msgs = await r.db('blargdb').table('catchat');
+    await msg2.edit('cat: Generating array...');
+    let content = [];
+    for (let message of msgs) {
+        content.push(message.content);
+    }
+    await msg2.edit('cat: Writing file...');
+    await new Promise((fulfill, reject) => {
+        fs.writeFile(path.join(__dirname, 'cat.json'),
+            JSON.stringify({
+                name: 'cat',
+                lines: content
+            }, null, 2), (err) => {
+                if (err) {
+                    console.err(err);
+                    reject(err);
+                    return;
+                };
+                jsons[id] = {
+                    name: 'cat',
+                    lines: content
+                };
+                nameIdMap[jsons[id].name] = id;
+                markovs[id] = new Markovify();
+                markovs[id].buildChain(jsons[id].lines.join(' \uE000 '));
+                msg2.edit('cat: Done.');
+                fulfill();
+            });
+    });
+}
+
+async function genlogs(msg, id, name) {
+    try {
+        let msg2 = await bot.createMessage(msg.channel.id, name + ': Performing query...');
+        let msgs;
+        if (Array.isArray(id)) {
+            id.push({
+                index: 'userid'
+            });
+            msgs = await r.db('blargdb').table('chatlogs').getAll(id[0], id[1], id[2]);
+        } else
+            msgs = await r.db('blargdb').table('chatlogs').getAll(id, {
+                index: 'userid'
+            });
+        await msg2.edit(name + ': Generating array...');
+        let content = [];
+        for (let message of msgs) {
+            content.push(message.content);
+        }
+        let userId;
+        if (Array.isArray(id)) userId = id[0];
+        else userId = id;
+        await msg2.edit(name + ': Writing file...');
+        await new Promise((fulfill, reject) => {
+            fs.writeFile(path.join(__dirname, 'jsons', userId + '.json'),
+                JSON.stringify({
+                    name: name,
+                    lines: content
+                }, null, 2), (err) => {
+                    if (err) {
+                        console.err(err);
+                        reject(err);
+                        return;
+                    };
+                    msg2.edit(name + ': Done.');
+                    fulfill();
+                });
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
+function readFile(id) {
+    return new Promise((fulfill, reject) => {
+        fs.readFile(path.join(__dirname, 'jsons', id + '.json'), (err, file) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            jsons[id] = JSON.parse(file);
+            nameIdMap[jsons[id].name] = id;
+            markovs[id] = new Markovify();
+            markovs[id].buildChain(jsons[id].lines.filter(l => {
+                return !/^[!@#$%\^&/\\;:.><,|=+-\[\]]/.test(l);
+            }).join(' \uE000 '));
+            fulfill()
+        });
+    });
 }
