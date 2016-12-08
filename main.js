@@ -201,7 +201,7 @@ bot.on('messageCreate', async function (msg) {
     } else if (msg.content.toLowerCase().endsWith(suffix)) {
         for (let key of Object.keys(nameIdMap)) {
             let content = msg.content.toLowerCase();
-            content = content.substring(0, content.length - suffix.length).replace(/[\n\s,]+/g);
+            content = content.substring(0, content.length - suffix.length).replace(/[\n\s,]+/g, '');
             console.log(content, key);
             if (content == key) {
                 markovPerson(msg, nameIdMap[key]);
