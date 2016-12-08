@@ -47,13 +47,6 @@ bot = new Eris.Client('Bot ' + config.token, {
 
 bot.on('ready', () => {
     console.log('stupid cat> YO SHIT WADDUP ITS DA CAT HERE');
-    for (let guild of bot.guilds) {
-        if (guild[1].members.get(CAT_ID) != undefined) {
-            bot.editNickname(guild[0], guild[1].members.get(CAT_ID).nick || bot.user.username).catch(err => {
-                console.log('Was unable to change nickname on guild', guild[1].name, guild[1].id);
-            })
-        }
-    }
 });
 
 bot.on('messageCreate', async function (msg) {
