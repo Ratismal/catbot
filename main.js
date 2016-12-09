@@ -103,7 +103,7 @@ bot.on('messageCreate', async function (msg) {
                         if (words[0].toLowerCase() == 'all') {
                             for (let key of Object.keys(nameIdMap)) {
                                 console.log(key);
-                                if (key != 'gus' && key != 'cat') {
+                                if (key != 'cat') {
                                     let id = nameIdMap[key];
                                     if (id) {
                                         await genlogs(msg, key);
@@ -359,10 +359,18 @@ async function genlogs(msg, name) {
             msgs = await r.db('blargdb').table('chatlogs').getAll(id, {
                 index: 'userid'
             });
-        await msg2.edit(name + ': Generating array...');
-        let content = [];
+        await msg2.edit(name + ': Updating array...');
+        let content = jsons[id];
+        if (!content) content = {
+            name: name,
+            lines: []
+        };
+        let pushed = 0;
         for (let message of msgs) {
-            content.push(message.content);
+            if (!content.lines.includes(message.content)) {
+                content.lines.push(message.content);
+                pushed++;
+            }
         }
         let userId;
         if (Array.isArray(id)) userId = id[0];
@@ -370,16 +378,13 @@ async function genlogs(msg, name) {
         await msg2.edit(name + ': Writing file...');
         await new Promise((fulfill, reject) => {
             fs.writeFile(path.join(__dirname, 'jsons', userId + '.json'),
-                JSON.stringify({
-                    name: name,
-                    lines: content
-                }, null, 2), (err) => {
+                JSON.stringify(content, null, 2), (err) => {
                     if (err) {
                         console.err(err);
                         reject(err);
                         return;
                     };
-                    msg2.edit(name + ': Done.');
+                    msg2.edit(name + ': Done. ' + pushed + ' lines added.');
                     fulfill();
                 });
         });

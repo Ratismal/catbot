@@ -2,3 +2,5 @@ config.json
 jsons/*
 .vscode/*
 cat.json
+*.txt
+aaaa.js
