@@ -130,9 +130,12 @@ bot.on('messageCreate', async function (msg) {
                 break;
             case 'list':
                 let nameList = [];
-                for (let key of Object.keys(nameIdMap)) {
-                    let user = await getUser(nameIdMap[key]);
-                    nameList.push(`**${key}** (${user.username}#${user.discriminator})`);
+                let keys = Object.keys(jsons).sort((a, b) => {
+                    return jsons[b].lines.length - jsons[a].lines.length
+                })
+                for (let key of keys) {
+                    let user = await getUser(key);
+                    nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines`);
                 }
                 bot.createMessage(msg.channel.id, `I've markoved the following people:\n - ${nameList.join('\n - ')}`)
                 break;
