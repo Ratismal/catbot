@@ -335,13 +335,13 @@ async function gencat(msg) {
                     reject(err);
                     return;
                 };
-                jsons[id] = {
+                jsons[CAT_ID] = {
                     name: 'cat',
                     lines: content
                 };
-                nameIdMap[jsons[id].name] = id;
-                markovs[id] = new Markovify();
-                markovs[id].buildChain(jsons[id].lines.join(' \uE000 '));
+                nameIdMap[jsons[CAT_ID].name] = CAT_ID;
+                markovs[CAT_ID] = new Markovify();
+                markovs[CAT_ID].buildChain(jsons[CAT_ID].lines.join(' \uE000 '));
                 msg2.edit('cat: Done.');
                 fulfill();
             });
