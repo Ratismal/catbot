@@ -188,6 +188,36 @@ bot.on('messageCreate', async function (msg) {
                 output = await filterMentions(output);
                 bot.createMessage(msg.channel.id, output || 'null');
                 break;
+            case 'purge':
+                let messageArray = await bot.getMessages(msg.channel.id, 100)
+                    /**
+                     * Checks if we have the permissions to remove them all at once
+                     */
+                var i;
+                if (msg.channel.permissionsOf(bot.user.id).json.manageMessages) {
+                    console.log(`Purging all of my messages in one fell swoop-da-whoop!`);
+                    var messageIdArray = [];
+                    for (i = 0; i < messageArray.length; i++) {
+                        if (messageArray[i].author.id === bot.user.id)
+                            messageIdArray.push(messageArray[i].id);
+                    }
+                    bot.deleteMessages(msg.channel.id, messageIdArray);
+                } else {
+                    /**
+                     * We don't, so we delete them one by one
+                     */
+                    console.log(`We're doing this the hard way!`);
+                    for (i = 0; i < messageArray.length; i++) {
+                        if (messageArray[i].author.id === bot.user.id) {
+                            messageArray[i].delete();
+                        }
+                    }
+                }
+                let msg2 = await bot.createMessage(msg.channel.id, 'Purging!')
+                setTimeout(function () {
+                    msg2.delete()
+                }, 5000);
+                break;
             default:
                 if (nameIdMap[commandName]) {
                     markovPerson(msg, nameIdMap[commandName]);
@@ -197,7 +227,7 @@ bot.on('messageCreate', async function (msg) {
     } else if (msg.content.toLowerCase().endsWith(suffix)) {
         for (let key of Object.keys(nameIdMap)) {
             let content = msg.content.toLowerCase();
-            content = content.substring(0, content.length - suffix.length).replace(/[\n\s,]+/g, '');
+            content = content.substring(0, content.length - suffix.length);
             console.log(content, key);
             if (content == key) {
                 markovPerson(msg, nameIdMap[key]);
