@@ -34,6 +34,10 @@ jsons['103347843934212096'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'c
 markovs['103347843934212096'] = new Markovify();
 markovs['103347843934212096'].buildChain(jsons['103347843934212096'].lines.join(' \uE000 '));
 
+jsons['dbots'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'dbots.json')));
+markovs['dbots'] = new Markovify();
+markovs['dbots'].buildChain(jsons['dbots'].lines.join(' \uE000 '));
+
 bot = new Eris.Client('Bot ' + config.token, {
     autoReconnect: true,
     disableEvents: {
@@ -118,7 +122,7 @@ bot.on('messageCreate', async function (msg) {
                             let id = nameIdMap[words[0].toLowerCase()];
                             if (id) {
                                 await genlogs(msg, words[0].toLowerCase());
-                                readFile(id);
+                                await readFile(id);
                             } else {
                                 bot.createMessage(msg.channel.id, 'Nope.');
                             }
@@ -135,7 +139,9 @@ bot.on('messageCreate', async function (msg) {
                 })
                 for (let key of keys) {
                     let user = await getUser(key);
-                    nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines`);
+                    if (user)
+                        nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines`);
+                    else nameList.push(`**${jsons[key].name}** - ${jsons[key].lines.length} lines`);
                 }
                 bot.createMessage(msg.channel.id, `I've markoved the following people:\n - ${nameList.join('\n - ')}`)
                 break;
@@ -221,26 +227,34 @@ bot.on('messageCreate', async function (msg) {
             default:
                 if (nameIdMap[commandName]) {
                     markovPerson(msg, nameIdMap[commandName]);
+                } else if (commandName == 'dbots') {
+                    markovPerson(msg, 'dbots', true);
                 }
                 break;
         }
     } else if (msg.content.toLowerCase().endsWith(suffix)) {
-        for (let key of Object.keys(nameIdMap)) {
-            let content = msg.content.toLowerCase();
-            content = content.substring(0, content.length - suffix.length);
-            console.log(content, key);
-            if (content == key) {
-                markovPerson(msg, nameIdMap[key]);
-                break;
+        let content = msg.content.toLowerCase();
+        content = content.substring(0, content.length - suffix.length);
+        if (content == 'dbots')
+            markovPerson(msg, 'dbots', true);
+        else
+            for (let key of Object.keys(nameIdMap)) {
+                if (content == key) {
+                    markovPerson(msg, nameIdMap[key]);
+                    break;
+                }
             }
-        }
     }
 });
 
 bot.connect();
 
 async function getUser(id) {
-    return bot.users.get(id) || await bot.getRESTUser(id);
+    try {
+        return bot.users.get(id) || await bot.getRESTUser(id);
+    } catch (err) {
+        return null
+    };
 }
 
 async function updateNick(msg) {
@@ -344,6 +358,7 @@ async function markovPerson(msg, id, clean) {
     else bot.createMessage(msg.channel.id, output);
 }
 
+
 async function gencat(msg) {
     let msg2 = await bot.createMessage(msg.channel.id, 'cat: Performing query...');
     let msgs;
@@ -361,7 +376,7 @@ async function gencat(msg) {
                 lines: content
             }, null, 2), (err) => {
                 if (err) {
-                    console.err(err);
+                    console.error(err);
                     reject(err);
                     return;
                 };
@@ -409,28 +424,36 @@ async function genlogs(msg, name) {
         if (Array.isArray(id)) userId = id[0];
         else userId = id;
         await msg2.edit(name + ': Writing file...');
-        await new Promise((fulfill, reject) => {
-            fs.writeFile(path.join(__dirname, 'jsons', userId + '.json'),
-                JSON.stringify(content, null, 2), (err) => {
-                    if (err) {
-                        console.err(err);
-                        reject(err);
-                        return;
-                    };
-                    msg2.edit(name + ': Done. ' + pushed + ' lines added.');
-                    fulfill();
-                });
-        });
+        await writeFile(userId, content, msg2, name, pushed);
     } catch (err) {
         console.error(err);
     }
 }
 
+function writeFile(userId, content, msg, name, pushed) {
+    return new Promise((fulfill, reject) => {
+        try {
+            let contentStr = JSON.stringify(content, null, 2);
+            fs.writeFile(path.join(__dirname, 'jsons', userId + '.json'), contentStr, (err) => {
+                if (err) {
+                    console.error(err);
+                    reject(err);
+                    return;
+                };
+                msg.edit(name + ': Done. ' + pushed + ' lines added.');
+                fulfill();
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
 
 function readFile(id) {
     return new Promise((fulfill, reject) => {
         fs.readFile(path.join(__dirname, 'jsons', id + '.json'), (err, file) => {
             if (err) {
+                console.error(err);
                 reject(err);
                 return;
             }
