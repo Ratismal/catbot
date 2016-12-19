@@ -57,10 +57,12 @@ class Markovify {
         if (this.keys.length === 0) throw "No Markov chain found"; // Fix
         var k = this.randomStart();
         var tokens = [k];
-        while ((k = this.randomChoice(this.chain[k]))  !== undefined) {
+        while ((k = this.randomChoice(this.chain[k])) !== undefined) {
             if (k === '\uE000')
-                if (tokens.length <= 3) tokens[tokens.length - 1] += '.';
-                else break;
+                if (tokens.length <= 3) {
+                    console.log(`Remaking chain '${tokens.join(' ')}' due to insufficient length.`);
+                    tokens = [];
+                } else break;
             else tokens.push(k);
             if (tokens.length > options.length - 1) break;
         }
