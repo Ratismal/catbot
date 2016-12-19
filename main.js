@@ -224,13 +224,13 @@ bot.on('messageCreate', async function (msg) {
                     msg2.delete()
                 }, 5000);
                 break;
-            default:
-                if (nameIdMap[commandName]) {
-                    markovPerson(msg, nameIdMap[commandName]);
-                } else if (commandName == 'dbots') {
-                    markovPerson(msg, 'dbots', true);
-                }
-                break;
+                //      default:
+                //          if (nameIdMap[commandName]) {
+                //             markovPerson(msg, nameIdMap[commandName]);
+                //        } else if (commandName == 'dbots') {
+                //             markovPerson(msg, 'dbots', true);
+                //         }
+                //        break;
         }
     } else if (msg.content.toLowerCase().endsWith(suffix)) {
         let content = msg.content.toLowerCase();
