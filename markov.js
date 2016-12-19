@@ -59,7 +59,7 @@ class Markovify {
         var tokens = [k];
         while ((k = this.randomChoice(this.chain[k])) !== undefined) {
             if (k === '\uE000')
-                if (tokens.length <= 3) {
+                if (tokens.length <= 2) {
                     console.log(`Remaking chain '${tokens.join(' ')}' due to insufficient length.`);
                     tokens = [];
                 } else break;
