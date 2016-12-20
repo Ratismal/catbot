@@ -49,6 +49,10 @@ bot = new Eris.Client('Bot ' + config.token, {
     restMode: true
 });
 
+const guildCache = {};
+
+const channels = {};
+
 bot.on('ready', () => {
     console.log('stupid cat> YO SHIT WADDUP ITS DA CAT HERE');
 });
@@ -133,17 +137,33 @@ bot.on('messageCreate', async function (msg) {
                 }
                 break;
             case 'list':
+                await bot.sendChannelTyping(msg.channel.id);
+                if (!channels[msg.channel.id])
+                    channels[msg.channel.id] = {};
+                if (channels[msg.channel.id] && channels[msg.channel.id].list)
+                    bot.deleteMessage(msg.channel.id, channels[msg.channel.id].list);
+
+                let page = 1;
+                if (!isNaN(parseInt(words[0])))
+                    page = parseInt(words[0]);
+                page--;
+
                 let nameList = [];
                 let keys = Object.keys(jsons).sort((a, b) => {
                     return jsons[b].lines.length - jsons[a].lines.length
                 })
-                for (let key of keys) {
+                for (let i = page * 10; i < keys.length && i < (page * 10) + 10; i++) {
+                    let key = keys[i];
                     let user = await getUser(key);
                     if (user)
                         nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines`);
                     else nameList.push(`**${jsons[key].name}** - ${jsons[key].lines.length} lines`);
                 }
-                bot.createMessage(msg.channel.id, `I've markoved the following people:\n - ${nameList.join('\n - ')}`)
+                let sentMsg = await bot.createMessage(msg.channel.id, `I've markoved the following people:
+ - ${nameList.join('\n - ')}
+ 
+Page **${page + 1}**/**${Math.floor(keys.length / 10)}**`);
+                channels[msg.channel.id].list = sentMsg.id;
                 break;
             case 'ping':
                 bot.createMessage(msg.channel.id, 'What is that supposed to mean?');
