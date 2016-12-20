@@ -90,11 +90,8 @@ Use the suffixes with the names in the 'list' command. Ex:
                 break;
             case 'add':
                 if (msg.author.id == CAT_ID) {
-                    if (msg.mentions.length > 0 && words[0]) {
-                        let ids = msg.mentions.map(u => u.id);
-                        if (ids.length == 1) {
-                            ids = ids[0];
-                        }
+                    if (words.length > 1) {
+                        let ids = words[1].match(/([0-9]{17,23})/)[1];
                         await r.db('blargdb').table('markovs').insert({
                             userid: ids,
                             id: words[0].toLowerCase()
