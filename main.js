@@ -77,11 +77,11 @@ bot.on('messageCreate', async function (msg) {
 Prefix: ${prefix}
 Prefix Commands:
   - **help**
-  - list
-  - ping
-  - purge
-  - pls
-  - thx
+  - **list**
+  - **ping**
+  - **purge**
+  - **pls**
+  - **thx**
 
 Suffix: ${suffix}
 Use the suffixes with the names in the 'list' command. Ex:
