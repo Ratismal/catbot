@@ -27,8 +27,9 @@ class Markovify {
         return padded.split(/\s+/);
     }
 
-    buildChain(input) {
-        this.chain = {};
+    buildChain(input, reset) {
+        if (reset || this.chain == undefined)
+            this.chain = {};
         var tokens = this.tokenize(input);
         var length = tokens.length - 1;
         for (var i = 0; i < length; i++) {

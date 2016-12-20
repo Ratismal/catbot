@@ -60,6 +60,9 @@ bot.on('ready', () => {
 bot.on('messageCreate', async function (msg) {
     var prefix = config.isbeta ? 'catbeta' : 'cat';
     var suffix = config.isbeta ? 'betapls' : 'pls';
+    if (jsons[msg.author.id]) {
+        updateJson(msg);
+    }
 
     if (msg.content.startsWith(prefix)) {
         await updateNick(msg);
@@ -69,6 +72,22 @@ bot.on('messageCreate', async function (msg) {
         let output;
         let commandName = words.shift().toLowerCase()
         switch (commandName) {
+            case 'help':
+                let helpMsg = `Hi! I'm stupid cat. I'm a pretty stupid cat, see?
+Prefix: ${prefix}
+Prefix Commands:
+  - **help**
+  - list
+  - ping
+  - purge
+  - pls
+  - thx
+
+Suffix: ${suffix}
+Use the suffixes with the names in the 'list' command. Ex:
+\`<name>pls\``;
+                bot.createMessage(msg.channel.id, helpMsg);
+                break;
             case 'add':
                 if (msg.author.id == CAT_ID) {
                     if (msg.mentions.length > 0 && words[0]) {
@@ -484,4 +503,20 @@ function readFile(id) {
             fulfill()
         });
     });
+}
+
+function updateJson(msg) {
+    if (jsons[msg.author.id].lines.indexOf(msg.content) == -1) {
+        jsons[msg.author.id].lines.push(msg.content);
+        let name = jsons[msg.author.id].name;
+        let filepath = path.join(__dirname, 'jsons', msg.author.id + '.json');
+        if (name == 'cat' || name == 'dbots') {
+            filepath = path.join(__dirname, name + '.json');
+        }
+        markovs[msg.author.id].buildChain(`\uE000 ${msg.content} \uE000`, false);
+
+        fs.writeFile(filepath, JSON.stringify(jsons[msg.author.id], null, 2), err => {
+            if (err) console.error(err);
+        });
+    }
 }
