@@ -3,6 +3,7 @@ var Eris = require('eris');
 var config = require('./config.json')
 var CAT_ID = '103347843934212096';
 const fs = require('fs');
+const moment = require('moment');
 const path = require('path');
 process.on("unhandledRejection", function (err) {
     console.error(err)
@@ -53,11 +54,56 @@ const guildCache = {};
 
 const channels = {};
 
+async function registerChangefeed() {
+    try {
+        console.log('Registering a changefeed!');
+        changefeed = await r.table('guild').changes({
+            squash: true
+        }).run((err, cursor) => {
+            if (err) console.error(err);
+            //logger.debug(cursor);
+            cursor.on('error', err => {
+                console.error(err);
+            });
+            cursor.on('data', data => {
+                // logger.debug(data);
+                if (data.new_val)
+                    bu.guildCache[data.new_val.guildid] = data.new_val;
+                else delete bu.guildCache[data.old_val.guildid];
+            });
+        });
+        changefeed.on('end', registerChangefeed);
+    } catch (err) {
+        console.log(`Failed to register a changefeed, will try again in 10 seconds.`);
+        setTimeout(registerChangefeed, 10000);
+    }
+}
+
+registerChangefeed();
+
+async function getGuild(id) {
+    if (!guildCache[id]) {
+        let guild = await r.db('catbot').table('guild').get(id);
+        guildCache[id] = guild;
+    }
+    return guildCache[id];
+}
+
 bot.on('ready', () => {
     console.log('stupid cat> YO SHIT WADDUP ITS DA CAT HERE');
 });
 
 bot.on('messageCreate', async function (msg) {
+    if (!msg.guild) return; // Don't respond in dms
+
+    if (!await getGuild(msg.guild.id)) {
+        await r.db('catbot').table('guild').insert({
+            id: msg.guild.id,
+            ratelimits: {}
+        });
+    }
+
+
     var prefix = config.isbeta ? 'catbeta' : 'cat';
     var suffix = config.isbeta ? 'betapls' : 'pls';
     if (jsons[msg.author.id]) {
@@ -65,6 +111,7 @@ bot.on('messageCreate', async function (msg) {
     }
 
     if (msg.content.startsWith(prefix)) {
+
         await updateNick(msg);
         var command = msg.content.replace(prefix, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
         console.log('stupid cat>', msg.author.username, msg.author.id, prefix, command);
@@ -72,6 +119,31 @@ bot.on('messageCreate', async function (msg) {
         let output;
         let commandName = words.shift().toLowerCase()
         switch (commandName) {
+            case 'ratelimit':
+                if (msg.author.id == CAT_ID) {
+                    let ratelimits;
+                    if (words.length > 1) {
+                        ratelimits = (await getGuild(msg.guild.id)).ratelimits;
+                        channels[msg.channel.id] = undefined;
+                        ratelimits[msg.channel.id] = {
+                            time: parseInt(words[0]),
+                            quantity: parseInt(words[1])
+                        }
+                        await r.db('catbot').table('guild').get(msg.guild.id).update({
+                            ratelimits
+                        });
+                        bot.createMessage(msg.channel.id, `Ok! A ratelimit of ${ratelimits[msg.channel.id].quantity} messages per ${ratelimits[msg.channel.id].time}ms has been created.`);
+                    } else {
+                        ratelimits = (await getGuild(msg.guild.id)).ratelimits;
+                        ratelimits[msg.channel.id] = undefined;
+
+                        await r.db('catbot').table('guild').replace({
+                            ratelimits
+                        });
+                        bot.createMessage(msg.channel.id, `Ok! The ratelimit on this channel has been removed.`);
+                    }
+                }
+                break;
             case 'help':
                 let helpMsg = `Hi! I'm stupid cat. I'm a pretty stupid cat, see?
 Prefix: ${prefix}
@@ -276,6 +348,16 @@ Page **${page + 1}**/**${Math.floor(keys.length / 10)}**`);
         else
             for (let key of Object.keys(nameIdMap)) {
                 if (content == key) {
+                    let doRatelimit = await checkRatelimit(msg);
+                    if (doRatelimit != false) {
+                        if (!channels[msg.channel.id].sentmsg) {
+                            console.log(doRatelimit, moment.duration(doRatelimit).asMilliseconds());
+                            bot.createMessage(msg.channel.id, 'This channel is under cooldown. Please try again in ' + (moment.duration(doRatelimit).asMilliseconds() / 1000) + ' seconds.')
+                            channels[msg.channel.id].sentmsg = true;
+                        }
+                        return;
+                    }
+
                     markovPerson(msg, nameIdMap[key]);
                     break;
                 }
@@ -516,4 +598,32 @@ function updateJson(msg) {
             if (err) console.error(err);
         });
     }
+}
+
+async function checkRatelimit(msg) {
+    let storedGuild = await getGuild(msg.guild.id);
+    let ratelimit = false;
+    if (storedGuild) {
+        if (storedGuild.ratelimits && storedGuild.ratelimits[msg.channel.id]) {
+            if (channels[msg.channel.id]) {
+                let duration = msg.timestamp - channels[msg.channel.id].lastmsg;
+                if (duration < storedGuild.ratelimits[msg.channel.id].time && channels[msg.channel.id].quantity >= storedGuild.ratelimits[msg.channel.id].quantity) {
+                    ratelimit = storedGuild.ratelimits[msg.channel.id].time - duration;
+                } else if (duration < storedGuild.ratelimits[msg.channel.id].time) {
+                    channels[msg.channel.id].quantity++;
+                } else {
+                    channels[msg.channel.id] = 1;
+                    channels[msg.channel.id].lastmsg = msg.timestamp;
+                    channels[msg.channel.id].sentmsg = false;
+                }
+            } else {
+                channels[msg.channel.id] = {
+                    lastmsg: msg.timestamp,
+                    quantity: 1,
+                    sentmsg: false
+                };
+            }
+        }
+    }
+    return ratelimit;
 }
