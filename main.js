@@ -119,6 +119,25 @@ bot.on('messageCreate', async function (msg) {
         let output;
         let commandName = words.shift().toLowerCase()
         switch (commandName) {
+            case 'markov':
+                bot.createMessage(msg.channel.id, `I'll explain how a markov chain works.
+\`\`\`Look at the banana.
+Apples are the best!\`\`\`
+A markov generates chains by first breaking a sentence into words, and then comparing what words follow what words. This gives it a grasp on a person's speech patterns. For example, the previous sentences would generate these chains:
+\`\`\`(beginning of sentence): look, apples
+look: at
+at: the
+the: banana, best
+banana: (end of sentence)
+apples: are
+are: the
+best: (end of sentence)\`\`\`
+So from that, a markov chain could generate
+\`\`\`Apples are the banana.\`\`\`
+It could also generate
+\`\`\`Look at the best!\`\`\`
+It doesn't look at your sentences as a whole, but the pattern of your speech.`)
+            break;
             case 'ratelimit':
                 if (msg.author.id == CAT_ID) {
                     let ratelimits;
@@ -149,6 +168,7 @@ bot.on('messageCreate', async function (msg) {
 Prefix: ${prefix}
 Prefix Commands:
   - **help**
+  - **markov**
   - **list**
   - **ping**
   - **purge**
