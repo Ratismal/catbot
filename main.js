@@ -57,7 +57,7 @@ const channels = {};
 async function registerChangefeed() {
     try {
         console.log('Registering a changefeed!');
-        changefeed = await r.table('guild').changes({
+        changefeed = await r.db('catbot').table('guild').changes({
             squash: true
         }).run((err, cursor) => {
             if (err) console.error(err);
@@ -68,8 +68,8 @@ async function registerChangefeed() {
             cursor.on('data', data => {
                 // logger.debug(data);
                 if (data.new_val)
-                    bu.guildCache[data.new_val.guildid] = data.new_val;
-                else delete bu.guildCache[data.old_val.guildid];
+                    guildCache[data.new_val.guildid] = data.new_val;
+                else delete guildCache[data.old_val.guildid];
             });
         });
         changefeed.on('end', registerChangefeed);
@@ -632,7 +632,7 @@ async function checkRatelimit(msg) {
                 } else if (duration < storedGuild.ratelimits[msg.channel.id].time) {
                     channels[msg.channel.id].quantity++;
                 } else {
-                    channels[msg.channel.id] = 1;
+                    channels[msg.channel.id].quantity = 1;
                     channels[msg.channel.id].lastmsg = msg.timestamp;
                     channels[msg.channel.id].sentmsg = false;
                 }
