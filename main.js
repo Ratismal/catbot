@@ -1,13 +1,18 @@
 var Eris = require('eris');
-
-var config = require('./config.json')
+Object.defineProperty(Eris.Message.prototype, "guild", {
+    get: function guild() {
+        return this.channel.guild;
+    }
+});
+var config = require('./config.json');
 var CAT_ID = '103347843934212096';
 const fs = require('fs');
 const moment = require('moment');
 const path = require('path');
+
 process.on("unhandledRejection", function (err) {
-    console.error(err)
-})
+    console.error(err);
+});
 
 const r = require('rethinkdbdash')({
     host: config.db.host,
@@ -24,22 +29,22 @@ var markovs = {};
 const Markovify = require('./markov.js');
 
 var nameIdMap = {};
-
+var rejectedIds = [];
 for (var i = 0; i < fileArray.length; i++) {
     var commandFile = fileArray[i];
     var id = commandFile.match(/(\d+)/)[1];
-    readFile(id);
+    readFile(id).catch(id => {
+        console.log(`A JSON file was malformed, deleting`, id);
+        fs.unlink(path.join(__dirname, 'jsons', id + '.json'));
+        rejectedIds.push(id);
+    });
 }
-
-jsons['103347843934212096'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'cat.json')))
-markovs['103347843934212096'] = new Markovify();
-markovs['103347843934212096'].buildChain(jsons['103347843934212096'].lines.join(' \uE000 '));
 
 jsons['dbots'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'dbots.json')));
 markovs['dbots'] = new Markovify();
 markovs['dbots'].buildChain(jsons['dbots'].lines.join(' \uE000 '));
 
-bot = new Eris.Client('Bot ' + config.token, {
+const bot = new Eris.Client('Bot ' + config.token, {
     autoReconnect: true,
     disableEvents: {
         PRESENCE_DATE: true,
@@ -47,7 +52,8 @@ bot = new Eris.Client('Bot ' + config.token, {
         TYPING_START: true
     },
     getAllUsers: true,
-    restMode: true
+    restMode: true,
+    defaultImageFormat: 'webp'
 });
 
 const guildCache = {};
@@ -57,7 +63,7 @@ const channels = {};
 async function registerChangefeed() {
     try {
         console.log('Registering a changefeed!');
-        changefeed = await r.db('catbot').table('guild').changes({
+        let changefeed = await r.db('catbot').table('guild').changes({
             squash: true
         }).run((err, cursor) => {
             if (err) console.error(err);
@@ -72,7 +78,10 @@ async function registerChangefeed() {
                 else delete guildCache[data.old_val.guildid];
             });
         });
-        changefeed.on('end', registerChangefeed);
+        changefeed.on('end', () => {
+            console.log(`Reached end of changelog, will try again in 10 seconds.`);
+            setTimeout(registerChangefeed, 10000);
+        });
     } catch (err) {
         console.log(`Failed to register a changefeed, will try again in 10 seconds.`);
         setTimeout(registerChangefeed, 10000);
@@ -89,11 +98,26 @@ async function getGuild(id) {
     return guildCache[id];
 }
 
+async function checkMalformed() {
+    if (rejectedIds.length > 0) {
+        for (let i = 0; i < rejectedIds.length; i++) {
+            await bot.createMessage('197529405659021322', `<@${CAT_ID}> Found and deleted a malformed JSON: ${rejectedIds.shift()}`);
+        }
+    }
+}
+
 bot.on('ready', () => {
     console.log('stupid cat> YO SHIT WADDUP ITS DA CAT HERE');
+    checkMalformed();
+});
+
+bot.on('error', function (err, id) {
+    if (err.message.indexOf('Message.guild') == -1)
+        console.error(`[${id}] ${err.stack}`);
 });
 
 bot.on('messageCreate', async function (msg) {
+    checkMalformed();
     if (!msg.guild) return; // Don't respond in dms
 
     if (!await getGuild(msg.guild.id)) {
@@ -110,14 +134,12 @@ bot.on('messageCreate', async function (msg) {
         updateJson(msg);
     }
 
-    if (msg.content.startsWith(prefix)) {
+    if (msg.content.startsWith(prefix) && !msg.content.startsWith(prefix + ' ') && msg.content.toLowerCase() != prefix + 'pls') {
 
-        await updateNick(msg);
         var command = msg.content.replace(prefix, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-        console.log('stupid cat>', msg.author.username, msg.author.id, prefix, command);
         var words = command.split(' ');
         let output;
-        let commandName = words.shift().toLowerCase()
+        let commandName = words.shift().toLowerCase();
         switch (commandName) {
             case 'markov':
                 bot.createMessage(msg.channel.id, `I'll explain how a markov chain works.
@@ -136,8 +158,8 @@ So from that, a markov chain could generate
 \`\`\`Apples are the banana.\`\`\`
 It could also generate
 \`\`\`Look at the best!\`\`\`
-It doesn't look at your sentences as a whole, but the pattern of your speech.`)
-            break;
+It doesn't look at your sentences as a whole, but the pattern of your speech.`);
+                break;
             case 'ratelimit':
                 if (msg.author.id == CAT_ID) {
                     let ratelimits;
@@ -147,7 +169,7 @@ It doesn't look at your sentences as a whole, but the pattern of your speech.`)
                         ratelimits[msg.channel.id] = {
                             time: parseInt(words[0]),
                             quantity: parseInt(words[1])
-                        }
+                        };
                         await r.db('catbot').table('guild').get(msg.guild.id).update({
                             ratelimits
                         });
@@ -180,11 +202,21 @@ Use the suffixes with the names in the 'list' command. Ex:
 \`<name>pls\``;
                 bot.createMessage(msg.channel.id, helpMsg);
                 break;
+            case 'nick':
+                if (msg.author.id == CAT_ID) {
+                    try {
+                        await bot.editNickname(msg.guild.id, words.join(' '));
+                        bot.createMessage(msg.channel.id, 'done and stuff');
+                    } catch (err) {
+                        bot.createMessage(msg.channel.id, `Can't`);
+                    }
+                }
+                break;
             case 'add':
                 if (msg.author.id == CAT_ID) {
                     if (words.length > 1) {
                         let ids = words[1].match(/([0-9]{17,23})/)[1];
-                        await r.db('blargdb').table('markovs').insert({
+                        await r.db('catbot').table('markovs').insert({
                             userid: ids,
                             id: words[0].toLowerCase()
                         });
@@ -199,7 +231,7 @@ Use the suffixes with the names in the 'list' command. Ex:
             case 'remove':
                 if (msg.author.id == CAT_ID) {
                     if (words[0]) {
-                        await r.db('blargdb').table('markovs').get(words[0].toLowerCase()).delete();
+                        await r.db('catbot').table('markovs').get(words[0].toLowerCase()).delete();
                         let id = nameIdMap[words[0].toLowerCase()];
                         if (id) {
                             delete nameIdMap[jsons[id].name];
@@ -258,8 +290,8 @@ Use the suffixes with the names in the 'list' command. Ex:
 
                 let nameList = [];
                 let keys = Object.keys(jsons).sort((a, b) => {
-                    return jsons[b].lines.length - jsons[a].lines.length
-                })
+                    return jsons[b].lines.length - jsons[a].lines.length;
+                });
                 for (let i = page * 10; i < keys.length && i < (page * 10) + 10; i++) {
                     let key = keys[i];
                     let user = await getUser(key);
@@ -311,11 +343,8 @@ Page **${page + 1}**/**${Math.floor(keys.length / 10)}**`);
                     });
                 }
                 break;
-            case 'pls': // yay markovs
-                markovPerson(msg, '103347843934212096', true);
-                break;
             case 'thx':
-                await bot.sendChannelTyping(msg.channel.id)
+                await bot.sendChannelTyping(msg.channel.id);
                 output = jsons['103347843934212096'].lines[getRandomInt(0, jsons['103347843934212096'].lines.length - 1)];
                 output = filterUrls(output);
                 console.log(output);
@@ -323,10 +352,10 @@ Page **${page + 1}**/**${Math.floor(keys.length / 10)}**`);
                 bot.createMessage(msg.channel.id, output || 'null');
                 break;
             case 'purge':
-                let messageArray = await bot.getMessages(msg.channel.id, 100)
-                    /**
-                     * Checks if we have the permissions to remove them all at once
-                     */
+                let messageArray = await bot.getMessages(msg.channel.id, 100);
+                /**
+                 * Checks if we have the permissions to remove them all at once
+                 */
                 var i;
                 if (msg.channel.permissionsOf(bot.user.id).json.manageMessages) {
                     console.log(`Purging all of my messages in one fell swoop-da-whoop!`);
@@ -347,18 +376,18 @@ Page **${page + 1}**/**${Math.floor(keys.length / 10)}**`);
                         }
                     }
                 }
-                let msg2 = await bot.createMessage(msg.channel.id, 'Purging!')
+                let msg2 = await bot.createMessage(msg.channel.id, 'Purging!');
                 setTimeout(function () {
-                    msg2.delete()
+                    msg2.delete();
                 }, 5000);
                 break;
-                //      default:
-                //          if (nameIdMap[commandName]) {
-                //             markovPerson(msg, nameIdMap[commandName]);
-                //        } else if (commandName == 'dbots') {
-                //             markovPerson(msg, 'dbots', true);
-                //         }
-                //        break;
+            //      default:
+            //          if (nameIdMap[commandName]) {
+            //             markovPerson(msg, nameIdMap[commandName]);
+            //        } else if (commandName == 'dbots') {
+            //             markovPerson(msg, 'dbots', true);
+            //         }
+            //        break;
         }
     } else if (msg.content.toLowerCase().endsWith(suffix)) {
         let content = msg.content.toLowerCase();
@@ -372,7 +401,7 @@ Page **${page + 1}**/**${Math.floor(keys.length / 10)}**`);
                     if (doRatelimit != false) {
                         if (!channels[msg.channel.id].sentmsg) {
                             console.log(doRatelimit, moment.duration(doRatelimit).asMilliseconds());
-                            bot.createMessage(msg.channel.id, 'This channel is under cooldown. Please try again in ' + (moment.duration(doRatelimit).asMilliseconds() / 1000) + ' seconds.')
+                            bot.createMessage(msg.channel.id, 'This channel is under cooldown. Please try again in ' + (moment.duration(doRatelimit).asMilliseconds() / 1000) + ' seconds.');
                             channels[msg.channel.id].sentmsg = true;
                         }
                         return;
@@ -391,7 +420,7 @@ async function getUser(id) {
     try {
         return bot.users.get(id) || await bot.getRESTUser(id);
     } catch (err) {
-        return null
+        return null;
     };
 }
 
@@ -474,13 +503,13 @@ async function filterMentions(message) {
 
 async function markovPerson(msg, id, clean) {
     let user = await getUser(id);
-    await bot.sendChannelTyping(msg.channel.id)
+    await bot.sendChannelTyping(msg.channel.id);
     output = markovs[id].say({
         length: 100
     });
     output = filterUrls(output);
     output = await filterMentions(output);
-    console.log(output)
+    console.log(output);
     if (!clean)
         bot.createMessage(msg.channel.id, {
             content: `Well, ${user.username} once said...`,
@@ -592,14 +621,19 @@ function readFile(id) {
         fs.readFile(path.join(__dirname, 'jsons', id + '.json'), (err, file) => {
             if (err) {
                 console.error(err);
-                reject(err);
+                reject(id);
                 return;
             }
-            jsons[id] = JSON.parse(file);
-            nameIdMap[jsons[id].name] = id;
-            if (!markovs[id]) markovs[id] = new Markovify();
-            markovs[id].buildChain(jsons[id].lines.join(' \uE000 '));
-            fulfill()
+            try {
+                jsons[id] = JSON.parse(file);
+                nameIdMap[jsons[id].name] = id;
+                if (!markovs[id]) markovs[id] = new Markovify();
+                markovs[id].buildChain(jsons[id].lines.join(' \uE000 '));
+                fulfill();
+            } catch (err) {
+                console.error(err);
+                reject(id);
+            }
         });
     });
 }
