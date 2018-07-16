@@ -237,7 +237,7 @@ Use the suffixes with the names in the 'list' command. Ex:
                             delete nameIdMap[jsons[id].name];
                             delete markovs[id];
                             delete jsons[id];
-                            fs.unlink(path.join(__dirname, 'jsons', id + '.json'));
+                            fs.unlink(path.join(__dirname, 'jsons', id + '.json'), () => {});
                         }
                         await bot.createMessage(msg.channel.id, 'Removed.');
                     } else {
@@ -564,16 +564,7 @@ async function genlogs(msg, name) {
     try {
         let id = (await r.table('markovs').get(name)).userid;
         let msg2 = await bot.createMessage(msg.channel.id, name + ': Performing query...');
-        let msgs;
-        if (Array.isArray(id)) {
-            id.push({
-                index: 'userid'
-            });
-            msgs = await r.db('blargdb').table('chatlogs').getAll(id[0], id[1], id[2]);
-        } else
-            msgs = await r.db('blargdb').table('chatlogs').getAll(id, {
-                index: 'userid'
-            });
+        let msgs = [];
         await msg2.edit(name + ': Updating array...');
         let content = jsons[id];
         if (!content) content = {
