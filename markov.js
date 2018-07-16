@@ -66,16 +66,22 @@ class Markovify {
 
                 if (a === 'please' && b === 'No') console.log(l);
                 toSeed[a] = true;
-                if (this.chain[a] === undefined) {
-                    this.chain[a] = {
-                        [b]: { weight: 1 }
-                    };
-                } else if (this.chain[a][b] === undefined) {
-                    this.chain[a][b] = {
-                        weight: 1
-                    };
-                } else {
-                    this.chain[a][b].weight++;
+                try {
+                    if (this.chain[a] === undefined) {
+                        this.chain[a] = {
+                            [b]: { weight: 1 }
+                        };
+                    } else if (typeof this.chain[a][b] !== 'object') {
+                        this.chain[a][b] = {
+                            weight: 1
+                        };
+                    } else {
+                        this.chain[a][b].weight++;
+
+                    }
+                } catch (err) {
+                    // may be memes like [constructor][name]
+                    console.error(err, this.chain[a][b], typeof this.chain[a][b], a, b);
                 }
             }
         }
@@ -164,29 +170,15 @@ class Markovify {
             return undefined;
         }
         let seed = this.getRandom(seeded.__max);
-
+        if (length >= 6 && seeded['\uE000']) {
+            if (this.getRandom(20) <= length)
+                return '\uE000';
+        }
         let res = Object.values(seeded).filter(v => {
             return seed >= v.min && seed <= v.max;
         });
         if (!res.length === 0) return null;
-
         console.log('result:', key, key.length, '|', res[0].key);
-
-        if (length >= 6 && seeded['\uE000'] && !['of', 'the', 'a'].includes(key.toLowerCase())) {
-            let _s = this.getRandom(30);
-            if (_s <= length) {
-                console.log('ended prematurely at length', length);
-                return '\uE000';
-            }
-        }
-
-        if (res.key === '\uE000' && ['of', 'the', 'a'].includes(key.toLowerCase())) {
-            console.log('chain ended with an invalid token, trying again');
-            return this.getNext(key, length);
-        }
-
-
-
         return res[0].key;
     }
 
