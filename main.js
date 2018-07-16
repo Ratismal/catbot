@@ -297,7 +297,7 @@ Use the suffixes with the names in the 'list' command. Ex:
                     let user = await getUser(key);
                     if (user)
                         nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines`);
-                    else nameList.push(`**${jsons[key].name}** - ${jsons[key].lines.length} lines`);
+                    else nameList.push(`**${jsons[key].name}** - ${jsons[key].lines.length} lines | ${jsons[key].uses} uses`);
                 }
                 let sentMsg = await bot.createMessage(msg.channel.id, `I've markoved the following people:
  - ${nameList.join('\n - ')}
@@ -505,7 +505,8 @@ async function markovPerson(msg, id, clean) {
     if (id === '103347843934212096') clean = true;
     let user = await getUser(id);
     await bot.sendChannelTyping(msg.channel.id);
-    output = markovs[id].say({
+    jsons[id].uses++;
+    let output = markovs[id].say({
         length: 100
     });
     output = filterUrls(output);
@@ -618,6 +619,8 @@ function readFile(id) {
             }
             try {
                 jsons[id] = JSON.parse(file);
+                if (!jsons[id].uses)
+                    jsons[id].uses = 0;
                 nameIdMap[jsons[id].name] = id;
                 if (!markovs[id]) markovs[id] = new Markovify();
                 markovs[id].buildChain(jsons[id].lines);
