@@ -42,7 +42,7 @@ for (var i = 0; i < fileArray.length; i++) {
 
 jsons['dbots'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'dbots.json')));
 markovs['dbots'] = new Markovify();
-markovs['dbots'].buildChain(jsons['dbots'].lines.join(' \uE000 '));
+markovs['dbots'].buildChain(jsons['dbots'].lines);
 
 const bot = new Eris.Client('Bot ' + config.token, {
     autoReconnect: true,
@@ -237,7 +237,7 @@ Use the suffixes with the names in the 'list' command. Ex:
                             delete nameIdMap[jsons[id].name];
                             delete markovs[id];
                             delete jsons[id];
-                            fs.unlink(path.join(__dirname, 'jsons', id + '.json'), () => {});
+                            fs.unlink(path.join(__dirname, 'jsons', id + '.json'), () => { });
                         }
                         await bot.createMessage(msg.channel.id, 'Removed.');
                     } else {
@@ -502,6 +502,7 @@ async function filterMentions(message) {
 };
 
 async function markovPerson(msg, id, clean) {
+    if (id === '103347843934212096') clean = true;
     let user = await getUser(id);
     await bot.sendChannelTyping(msg.channel.id);
     output = markovs[id].say({
@@ -619,7 +620,7 @@ function readFile(id) {
                 jsons[id] = JSON.parse(file);
                 nameIdMap[jsons[id].name] = id;
                 if (!markovs[id]) markovs[id] = new Markovify();
-                markovs[id].buildChain(jsons[id].lines.join(' \uE000 '));
+                markovs[id].buildChain(jsons[id].lines);
                 fulfill();
             } catch (err) {
                 console.error(err);

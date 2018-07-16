@@ -5,3 +5,4 @@ cat.json
 *.txt
 aaaa.js
 *.json
+node_modules/*
