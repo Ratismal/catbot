@@ -62,16 +62,16 @@ class Markovify {
             for (var i = 0; i < length; i++) {
                 var a = tokens[i];
                 var b = tokens[i + 1];
-                if (a == '' || b == '') continue;
+                if ({}.hasO)
+                    if (a == '' || b == '') continue;
 
                 if (a === 'please' && b === 'No') console.log(l);
                 toSeed[a] = true;
                 try {
-                    if (this.chain[a] === undefined) {
-                        this.chain[a] = {
-                            [b]: { weight: 1 }
-                        };
-                    } else if (typeof this.chain[a][b] !== 'object') {
+                    if (!this.chain[a] || typeof this.chain[a] !== 'object') {
+                        this.chain[a] = {};
+                    }
+                    if (typeof this.chain[a][b] !== 'object') {
                         this.chain[a][b] = {
                             weight: 1
                         };
