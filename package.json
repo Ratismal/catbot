@@ -1,0 +1,24 @@
+{
+  "name": "catbot",
+  "version": "1.0.0",
+  "description": "This is a **stupid cat#1370**, a markov bot made in my own image.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ratismal/catbot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ratismal/catbot/issues"
+  },
+  "homepage": "https://github.com/ratismal/catbot#readme",
+  "dependencies": {
+    "eris": "^0.8.6",
+    "moment": "^2.22.2",
+    "rethinkdbdash": "^2.3.31"
+  }
+}
