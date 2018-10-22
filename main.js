@@ -134,6 +134,8 @@ bot.on('messageCreate', async function (msg) {
         updateJson(msg);
     }
 
+    if (msg.author.bot) return; // don't respond to bots
+
     if (msg.content.startsWith(prefix) && !msg.content.startsWith(prefix + ' ') && msg.content.toLowerCase() != prefix + 'pls') {
 
         var command = msg.content.replace(prefix, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
