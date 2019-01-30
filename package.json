@@ -4,7 +4,10 @@
   "description": "This is a **stupid cat#1370**, a markov bot made in my own image.",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sequelize": "sequelize",
+    "build": "rm -rf build/ && tsc",
+    "start": "npm run build && node build/src/index.js"
   },
   "repository": {
     "type": "git",
@@ -17,8 +20,19 @@
   },
   "homepage": "https://github.com/ratismal/catbot#readme",
   "dependencies": {
+    "@ayana/bento": "^1.0.0-alpha.14",
+    "cat-loggr": "^1.0.10",
     "eris": "^0.8.6",
     "moment": "^2.22.2",
-    "rethinkdbdash": "^2.3.31"
+    "pg": "^7.8.0",
+    "rethinkdbdash": "^2.3.31",
+    "sequelize": "^4.42.0",
+    "sequelize-cli": "^5.4.0"
+  },
+  "devDependencies": {
+    "@ayana/tslint-config": "^1.0.0",
+    "@types/node": "^10.12.19",
+    "tslint": "^5.12.1",
+    "typescript": "^3.2.4"
   }
 }
