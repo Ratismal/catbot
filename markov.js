@@ -49,7 +49,6 @@ class Markovify {
             input = [input];
 
         for (let l of input) {
-            if (l.trim() === '') continue;
             let cont = true;
             for (const p of commonPrefixes) {
                 if (p.test(l)) cont = false;
@@ -168,7 +167,7 @@ class Markovify {
         let seeded = this.seeded[key];
         if (!seeded) {
             console.log('seed for', key, 'was undefined?');
-            return null;
+            return undefined;
         }
         let seed = this.getRandom(seeded.__max);
         if (length >= 6 && seeded['\uE000']) {
