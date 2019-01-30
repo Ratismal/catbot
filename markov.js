@@ -49,6 +49,7 @@ class Markovify {
             input = [input];
 
         for (let l of input) {
+            if (l.trim() === '') continue;
             let cont = true;
             for (const p of commonPrefixes) {
                 if (p.test(l)) cont = false;

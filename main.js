@@ -26,6 +26,8 @@ console.log('loading jsons');
 var fileArray = fs.readdirSync(path.join(__dirname, 'jsons'));
 var jsons = {};
 var markovs = {};
+let dirty = {};
+
 const Markovify = require('./markov.js');
 
 var nameIdMap = {};
@@ -41,6 +43,10 @@ for (var i = 0; i < fileArray.length; i++) {
 }
 
 jsons['dbots'] = JSON.parse(fs.readFileSync(path.join(__dirname, 'dbots.json')));
+if (!jsons.dbots.uses) {
+    jsons.dbots.uses = 0;
+    dirty.dbots = true;
+}
 markovs['dbots'] = new Markovify();
 markovs['dbots'].buildChain(jsons['dbots'].lines);
 
@@ -296,7 +302,7 @@ Use the suffixes with the names in the 'list' command. Ex:
                     let key = keys[i];
                     let user = await getUser(key);
                     if (user)
-                        nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines`);
+                        nameList.push(`**${jsons[key].name}** (${user.username}#${user.discriminator}) - ${jsons[key].lines.length} lines | ${jsons[key].uses} uses`);
                     else nameList.push(`**${jsons[key].name}** - ${jsons[key].lines.length} lines | ${jsons[key].uses} uses`);
                 }
                 let sentMsg = await bot.createMessage(msg.channel.id, `I've markoved the following people:
@@ -633,21 +639,32 @@ function readFile(id) {
     });
 }
 
+
 function updateJson(msg) {
     if (jsons[msg.author.id].lines.indexOf(msg.content) == -1) {
         jsons[msg.author.id].lines.push(msg.content);
         let name = jsons[msg.author.id].name;
-        let filepath = path.join(__dirname, 'jsons', msg.author.id + '.json');
-        if (name == 'cat' || name == 'dbots') {
-            filepath = path.join(__dirname, name + '.json');
-        }
+
         markovs[msg.author.id].buildChain(`\uE000 ${msg.content} \uE000`, false);
 
-        fs.writeFile(filepath, JSON.stringify(jsons[msg.author.id], null, 2), err => {
-            if (err) console.error(err);
-        });
+        dirty[msg.author.id] = true;
     }
 }
+
+setInterval(() => {
+    for (const key in dirty) {
+        if (dirty[key] === true) {
+            let filepath = path.join(__dirname, 'jsons', key + '.json');
+            if (key == 'dbots') {
+                filepath = path.join(__dirname, key + '.json');
+            }
+            fs.writeFile(filepath, JSON.stringify(jsons[key], null, 2), err => {
+                if (err) console.error(err);
+            });
+            dirty[key] = false;
+        }
+    }
+}, 1000 * 60 * 5);
 
 async function checkRatelimit(msg) {
     let storedGuild = await getGuild(msg.guild.id);
