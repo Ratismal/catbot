@@ -1,30 +1,31 @@
 import { Bento, FSComponentLoader } from '@ayana/bento';
 
-const CatLoggr = require('cat-loggr');
+import Loggr from './loggr';
+const console = Loggr.get('Root');
 
-const loggr = new CatLoggr({
-  level: 'debug',
-  levels: [
-    { name: 'fatal', color: CatLoggr._chalk.red.bgBlack, err: true },
-    { name: 'error', color: CatLoggr._chalk.black.bgRed, err: true },
-    { name: 'warn', color: CatLoggr._chalk.black.bgYellow, err: true },
-    { name: 'trace', color: CatLoggr._chalk.green.bgBlack, trace: true },
-    { name: 'info', color: CatLoggr._chalk.black.bgGreen },
-    { name: 'verbose', color: CatLoggr._chalk.black.bgCyan },
-    { name: 'debug', color: CatLoggr._chalk.magenta.bgBlack, aliases: ['log', 'dir'] },
-    { name: 'database', color: CatLoggr._chalk.green.bgBlack }
-  ]
-}).setGlobal();
-
+import * as plugins from './plugins';
 const bento = new Bento();
+const config = require('../config.json');
 
 (async () => {
-  const fsloader = new FSComponentLoader();
-  await fsloader.addDirectory(__dirname, 'components');
+	console.init('Setting initial variables...');
+	bento.setVariable('_config', config);
 
-  await bento.addPlugin(fsloader);
-  await bento.verify();
+	bento.setVariable('loggedUsers', []);
+	bento.setVariable('ignoredUsers', []);
+
+	bento.setVariable('prefix', config.prefix || 'cat');
+	bento.setVariable('suffix', config.suffix || 'pls');
+
+	console.init('Loading CatBot...');
+	const fsloader = new FSComponentLoader();
+	await fsloader.addDirectory(__dirname, 'components');
+
+	const _plugins = Object.values(plugins).map(p => new p());
+
+	await bento.addPlugins([fsloader, ..._plugins]);
+	await bento.verify();
 })().catch(err => {
-  console.error('Error encountered while initializing Bento:', err);
-  process.exit(1);
+	console.fatal('Error encountered while initializing Bento:', err);
+	process.exit(1);
 });

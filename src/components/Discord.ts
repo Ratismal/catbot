@@ -1,54 +1,57 @@
 import * as Eris from 'eris';
-import * as config from '../../config.json';
 
 import {
-  ComponentAPI,
-  SubscribeEvent,
-  Variable,
-  VariableDefinitionType,
+	ComponentAPI,
+	SubscribeEvent,
+	Variable,
+	VariableDefinitionType,
 } from '@ayana/bento';
 
 import { DiscordEvent } from '../Constants';
 
-export class DiscordComponent {
-  public api: ComponentAPI;
-  public name: string = 'DiscordComponent';
+import Loggr from '../loggr';
+const console = Loggr.get('Discord');
 
-  private cli: Eris.Client = null;
+export class Discord {
+	public api: ComponentAPI;
+	public name: string = 'Discord';
 
-  private token: string = config.token;
+	private cli: Eris.Client = null;
 
-  public async onLoad() {
-    console.log('Initializing discord...');
-    this.cli = new Eris.Client(this.token, {
-      autoreconnect: true,
-      firstShardID: 0,
-      maxShards: 1
-    });
+	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
+	private config: { [key: string]: any };
 
-    this.api.forwardEvents(this.cli, Object.values(DiscordEvent));
+	public async onLoad() {
+		console.log('Initializing discord...');
+		this.cli = new Eris.Client(this.config.token, {
+			autoreconnect: true,
+			firstShardID: 0,
+			maxShards: 1
+		});
 
-    await this.cli.connect();
-  }
+		this.api.forwardEvents(this.cli, Object.values(DiscordEvent));
 
-  public async onUnload() {
-    this.cli.disconnect({ reconnect: false });
-    this.cli.removeAllListeners();
-    this.cli = null;
-  }
+		await this.cli.connect();
+	}
 
-  @SubscribeEvent(DiscordComponent, DiscordEvent.SHARD_READY)
-  private handleReady(id: number) {
-    console.info('Shard %d Ready!', id);
-  }
+	public async onUnload() {
+		this.cli.disconnect({ reconnect: false });
+		this.cli.removeAllListeners();
+		this.cli = null;
+	}
 
-  @SubscribeEvent(DiscordComponent, DiscordEvent.SHARD_RESUME)
-  private handleResume(id: number) {
-    console.info('Shard %d Resumed!', id);
-  }
+	@SubscribeEvent(Discord, DiscordEvent.SHARD_READY)
+	private handleReady(id: number) {
+		console.shard('Shard %d Ready!', id);
+	}
 
-  @SubscribeEvent(DiscordComponent, DiscordEvent.SHARD_DISCONNECT)
-  private handleDisconnect(id: number) {
-    console.info('Shard %d Disconnected!', id);
-  }
+	@SubscribeEvent(Discord, DiscordEvent.SHARD_RESUME)
+	private handleResume(id: number) {
+		console.shard('Shard %d Resumed!', id);
+	}
+
+	@SubscribeEvent(Discord, DiscordEvent.SHARD_DISCONNECT)
+	private handleDisconnect(id: number) {
+		console.shard('Shard %d Disconnected!', id);
+	}
 }

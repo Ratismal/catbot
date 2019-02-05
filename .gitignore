@@ -7,3 +7,4 @@ cat.json
 aaaa.js
 *.json
 node_modules/*
+dist/

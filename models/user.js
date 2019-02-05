@@ -18,6 +18,11 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.ARRAY(Sequelize.BIGINT),
       allowNull: false,
       defaultValue: []
+    },
+    uses: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0
     }
   }, {});
   user.associate = function (models) {

@@ -154,9 +154,9 @@ camelcase@^5.0.0:
   integrity sha512-faqwZqnWxbxn+F1d399ygeamQNy3lPp/H9H6rNrqYh4FSVCtcY+3cub1MxA8o9mDd55mM8Aghuu/kuyYA6VTsA==
 
 cat-loggr@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/cat-loggr/-/cat-loggr-1.0.10.tgz#036f8c1ba1829b4accb34d9f9a29ebedeaab072a"
-  integrity sha512-+4ACXvjO+l6LZrGjAyv/YNxaFN1L10TctII/K9vtS8a+nzgHRVsIBpWC1FiQYcDdZ3zBUdblKe+xubGjpOqAMQ==
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/cat-loggr/-/cat-loggr-1.0.17.tgz#f89e7c021b350d79efbb1376040692b86129e118"
+  integrity sha512-cfWaU+x9IeEzIx2OmZMwdAtIOr5yj0f/KE4rHRg/4zektEX94G69xAXZNLh82YSw9c/guuTOzLf40+dvVSLDgg==
   dependencies:
     chalk "^2.4.1"
     moment "^2.22.2"
@@ -286,6 +286,11 @@ decamelize@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
   integrity sha1-9lNNFRSCabIDUue+4m9QH5oZEpA=
+
+deck@>=0.0.3:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/deck/-/deck-0.0.4.tgz#d4d89d460ba81ee820b04a05a7d0dce64d8b730a"
+  integrity sha1-1NidRguoHuggsEoFp9Dc5k2Lcwo=
 
 depd@^1.1.0:
   version "1.1.2"
@@ -498,6 +503,13 @@ has-flag@^3.0.0:
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-3.0.0.tgz#b5d454dc2199ae225699f3467e5a07f3b955bafd"
   integrity sha1-tdRU3CGZriJWmfNGfloH87lVuv0=
 
+hashish@>=0.0.2:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/hashish/-/hashish-0.0.4.tgz#6d60bc6ffaf711b6afd60e426d077988014e6554"
+  integrity sha1-bWC8b/r3Ebav1g5CbQd5iAFOZVQ=
+  dependencies:
+    traverse ">=0.2.4"
+
 immutable@^3.8.2:
   version "3.8.2"
   resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
@@ -604,6 +616,11 @@ jsonfile@^4.0.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
+lazy@>=1.0.3:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/lazy/-/lazy-1.0.11.tgz#daa068206282542c088288e975c297c1ae77b690"
+  integrity sha1-2qBoIGKCVCwIgojpdcKXwa53tpA=
+
 lcid@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/lcid/-/lcid-2.0.0.tgz#6ef5d2df60e52f82eb228a4c373e8d1f397253cf"
@@ -645,6 +662,15 @@ map-age-cleaner@^0.1.1:
   integrity sha512-bJzx6nMoP6PDLPBFmg7+xRKeFZvFboMrGlxmNj9ClvX53KrmvM5bXFXEWjbz4cz1AFn+jWJ9z/DJSz7hrs0w3w==
   dependencies:
     p-defer "^1.0.0"
+
+markov@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/markov/-/markov-0.0.7.tgz#35ace82ae26133f719e1608d21f0cbc21452abe3"
+  integrity sha1-NazoKuJhM/cZ4WCNIfDLwhRSq+M=
+  dependencies:
+    deck ">=0.0.3"
+    hashish ">=0.0.2"
+    lazy ">=1.0.3"
 
 mem@^4.0.0:
   version "4.1.0"
@@ -1154,6 +1180,11 @@ toposort-class@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/toposort-class/-/toposort-class-1.0.1.tgz#7ffd1f78c8be28c3ba45cd4e1a3f5ee193bd9988"
   integrity sha1-f/0feMi+KMO6Rc1OGj9e4ZO9mYg=
+
+traverse@>=0.2.4:
+  version "0.6.6"
+  resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
+  integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
 
 tslib@1.9.0:
   version "1.9.0"

@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "sequelize": "sequelize",
-    "build": "rm -rf build/ && tsc",
-    "start": "npm run build && node build/src/index.js"
+    "build": "rm -rf dist/ && tsc",
+    "start": "npm run build && node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "@ayana/bento": "^1.0.0-alpha.14",
     "cat-loggr": "^1.0.10",
     "eris": "^0.8.6",
+    "markov": "^0.0.7",
     "moment": "^2.22.2",
     "pg": "^7.8.0",
     "rethinkdbdash": "^2.3.31",

@@ -1,15 +1,31 @@
-const CatLoggr = require('cat-loggr');
+import CatLoggr, { LoggrConfig, LogLevel } from 'cat-loggr/ts';
+import chalk from 'chalk';
 
-const loggr = new CatLoggr({
-  level: 'debug',
-  levels: [
-    { name: 'fatal', color: CatLoggr._chalk.red.bgBlack, err: true },
-    { name: 'error', color: CatLoggr._chalk.black.bgRed, err: true },
-    { name: 'warn', color: CatLoggr._chalk.black.bgYellow, err: true },
-    { name: 'trace', color: CatLoggr._chalk.green.bgBlack, trace: true },
-    { name: 'info', color: CatLoggr._chalk.black.bgGreen },
-    { name: 'verbose', color: CatLoggr._chalk.black.bgCyan },
-    { name: 'debug', color: CatLoggr._chalk.magenta.bgBlack, aliases: ['log', 'dir'] },
-    { name: 'database', color: CatLoggr._chalk.green.bgBlack }
-  ]
-}).setGlobal();
+export default class Loggr extends CatLoggr {
+	name: string = 'Loggr';
+
+	static get(name?: string): Loggr {
+		const config: LoggrConfig = DefaultLoggrConfig(name);
+		return new Loggr(config);
+	}
+}
+
+export function DefaultLoggrConfig(name?: string): LoggrConfig {
+	return new LoggrConfig({
+		level: 'debug',
+		shardLength: 20,
+		shardId: name || 'Generic',
+		levels: [
+			new LogLevel('fatal', chalk.red.bgBlack).setError(true),
+			new LogLevel('error', chalk.black.bgRed).setError(true),
+			new LogLevel('warn', chalk.black.bgYellow).setError(true),
+			new LogLevel('trace', chalk.green.bgBlack).setTrace(true),
+			new LogLevel('shard', chalk.black.bgYellow),
+			new LogLevel('init', chalk.black.bgBlue),
+			new LogLevel('info', chalk.black.bgGreen),
+			new LogLevel('verbose', chalk.black.bgCyan),
+			new LogLevel('debug', chalk.magenta.bgBlack).setAliases('log', 'dir'),
+			new LogLevel('database', chalk.green.bgBlack)
+		]
+	});
+}

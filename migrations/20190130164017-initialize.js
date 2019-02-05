@@ -17,9 +17,14 @@ module.exports = {
         defaultValue: []
       },
       idAliases: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
+        type: Sequelize.ARRAY(Sequelize.BIGINT),
         allowNull: false,
         defaultValue: []
+      },
+      uses: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,
