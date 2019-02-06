@@ -26,11 +26,12 @@ export class UserMarkov implements Command {
 		const discord: any = this.api.getComponent('Discord');
 		const user = await db.findUserByName(args[0]);
 
-		await user.increment('uses');
 
 		const duser = await discord.getUser(user.userId);
 
 		if (user) {
+			await user.increment('uses');
+
 			const builder = this.api.getComponent<MarkovBuilder>(MarkovBuilder);
 			const markov = await builder.getOrCreateMarkov(user.userId);
 			// console.log(markov);
