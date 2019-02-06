@@ -16,24 +16,39 @@ export class UserMarkov implements Command {
 
 	public command: string = '_usermarkov';
 
-	public dependencies: string[] = ['MarkovBuilder'];
+	public dependencies: string[] = ['MarkovBuilder', 'Discord'];
 	public plugins: string[] = ['Database'];
 
 	public prefix: boolean = false;
 
 	public async execute({ channel, args }: CommandExecute) {
 		const db: any = this.api.getPlugin('Database');
+		const discord: any = this.api.getComponent('Discord');
 		const user = await db.findUserByName(args[0]);
+
+		const duser = await discord.getUser(user.userId);
 
 		if (user) {
 			const builder = this.api.getComponent<MarkovBuilder>(MarkovBuilder);
 			const markov = await builder.getOrCreateMarkov(user.userId);
-			console.log(markov);
-			const key = markov.markov.pick();
-			const statement = markov.markov.fill(key, 20);
-			console.log(key, statement);
-
-			await channel.createMessage(statement.join(' '));
+			// console.log(markov);
+			const keys = markov.create(3, 15);
+			// const statement = markov.markov.fill(key, 20);
+			// console.log(key, statement);
+			if (user.userId === '103347843934212096') {
+				await channel.createMessage(keys.join(' '));
+			} else {
+				await channel.createMessage({
+					content: `Well, ${duser.username} once said...`,
+					embed: {
+						author: {
+							name: `${duser.username}#${duser.discriminator}`,
+							icon_url: duser.avatarURL
+						},
+						description: keys.join(' ')
+					}
+				});
+			}
 		}
 	}
 }

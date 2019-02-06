@@ -13,7 +13,8 @@ import { DiscordEvent } from '../Constants';
 import Loggr from '../loggr';
 const console = Loggr.get('MarkovBuilder');
 
-const markov = require('markov');
+import Markov from 'cat-markov';
+// const markov = require('markov');
 
 export class MarkovBuilder {
 	public api: ComponentAPI;
@@ -28,7 +29,7 @@ export class MarkovBuilder {
 	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
 	private ignoredUsers: string[];
 
-	private markovs: {[key: string]: any};
+	private markovs: { [key: string]: any };
 
 	public getMarkov(userId: string) {
 		return this.markovs[userId];
@@ -65,7 +66,7 @@ export class MarkovBuilder {
 
 		if (!user) throw Error('Markov did not exist.');
 
-		const _markov = this.markovs[userId] = { names: [user.name, ...user.aliases], markov: markov(1) };
+		const markov = this.markovs[userId] = new Markov([user.name, ...user.aliases]);
 		const lines = await db.user_line.findAll({
 			where: {
 				userId
@@ -74,22 +75,15 @@ export class MarkovBuilder {
 
 		console.log('Found', lines.length, 'records.');
 
-		let i: number = 0;
 		for (const line of lines) {
-			for (const formatted of line.formattedLines) {
-				_markov.markov.seed(formatted);
-				// await this.seed(userId, formatted);
-				if (++i % 1000 === 0) console.log('Seeded', i, 'lines.');
-			}
+			markov.seed(line.formattedLines);
 		}
 		console.log('Finished seeding.');
 	}
 
 	private async updateMarkov(userId: string, lines: string[]) {
 		if (this.markovs[userId]) {
-			for (const formatted of lines) {
-				this.seed(userId, formatted);
-			}
+			this.markovs[userId].seed(lines);
 		}
 	}
 

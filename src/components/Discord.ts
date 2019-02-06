@@ -1,4 +1,5 @@
 import * as Eris from 'eris';
+import { User } from 'eris';
 
 import {
 	ComponentAPI,
@@ -38,6 +39,15 @@ export class Discord {
 		this.cli.disconnect({ reconnect: false });
 		this.cli.removeAllListeners();
 		this.cli = null;
+	}
+
+	public async getUser(id: string): Promise<User> {
+		let user: User = this.cli.users.get(id);
+		if (!user) {
+			user = await this.cli.getRESTUser(id);
+			this.cli.users.set(user.id, user);
+		}
+		return user;
 	}
 
 	@SubscribeEvent(Discord, DiscordEvent.SHARD_READY)
