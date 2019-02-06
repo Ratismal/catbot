@@ -25,8 +25,6 @@ export class UserMarkov implements Command {
 		const db: any = this.api.getPlugin('Database');
 		const discord: any = this.api.getComponent('Discord');
 		const user = await db.findUserByName(args[0]);
-
-
 		const duser = await discord.getUser(user.userId);
 
 		if (user) {
