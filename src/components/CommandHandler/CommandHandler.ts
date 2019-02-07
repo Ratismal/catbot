@@ -7,7 +7,7 @@ import {
 	VariableDefinitionType
 } from '@ayana/bento';
 
-import { Message, TextChannel } from 'eris';
+import { Client, Message, TextChannel } from 'eris';
 
 import { DiscordEvent } from '../../Constants';
 import { Discord } from '../Discord';
@@ -22,7 +22,9 @@ export class CommandHandler {
 
 	public dependencies: string[] = ['Discord'];
 
-	private commands: Map<string, Command> = new Map();
+	public client: Client;
+
+	public commands: Map<string, Command> = new Map();
 
 	@Variable({ type: VariableDefinitionType.STRING, name: 'prefix' })
 	private prefix: string;
@@ -32,6 +34,9 @@ export class CommandHandler {
 	public async onLoad() {
 		console.init('Loading commands...');
 		await this.api.loadComponents(FSComponentLoader, __dirname, 'commands');
+
+		const discord: Discord = this.api.getComponent('Discord');
+		this.client = discord.client;
 	}
 
 	public async onChildLoad(command: Command) {
@@ -71,13 +76,13 @@ export class CommandHandler {
 		let content: string = message.content;
 		if (message.content.endsWith(this.suffix)) {
 			content = content.substring(0, content.length - this.suffix.length).toLowerCase();
-			console.log(content);
 			if (/\s$/.test(content)) return;
 
 			const command = this.commands.get('_usermarkov');
 			const execute: CommandExecute = {
 				message, channel: message.channel,
-				author: message.author, args: [content]
+				author: message.author, args: [content],
+				client: this.client
 			};
 			try {
 				await command.execute(execute);
@@ -86,7 +91,6 @@ export class CommandHandler {
 			}
 		} else if (message.content.startsWith(this.prefix)) {
 			content = content.substring(this.suffix.length).toLowerCase();
-			console.log(content);
 			if (/^\s/.test(content)) return;
 
 			const segments: string[] = content.split(/\s+/);
@@ -96,7 +100,8 @@ export class CommandHandler {
 
 				const execute: CommandExecute = {
 					message, channel: message.channel,
-					author: message.author, args: segments.slice(1)
+					author: message.author, args: segments.slice(1),
+					client: this.client
 				};
 				try {
 					await command.execute(execute);

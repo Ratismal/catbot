@@ -1,4 +1,5 @@
 import {
+	Client,
 	Member,
 	Message,
 	TextChannel,
@@ -10,4 +11,5 @@ export interface CommandExecute {
 	channel: TextChannel;
 	author: Member | User;
 	args: Array<string>;
+	client: Client;
 }

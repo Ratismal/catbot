@@ -62,9 +62,9 @@ export class MarkovBuilder {
 
 		const user = await db.findUser(userId);
 
-		console.info('Building the markov for \'%s\'', user.name);
-
 		if (!user) throw Error('Markov did not exist.');
+
+		console.info('Building the markov for \'%s\'', user.name);
 
 		const markov = this.markovs[userId] = new Markov([user.name, ...user.aliases]);
 		const lines = await db.user_line.findAll({

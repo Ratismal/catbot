@@ -4,4 +4,5 @@ import { CommandExecute } from './CommandExecute';
 export interface Command extends Component {
 	command: string;
 	execute(arg?: CommandExecute): Promise<void>;
+	prefix: boolean;
 }

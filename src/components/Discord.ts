@@ -17,35 +17,35 @@ export class Discord {
 	public api: ComponentAPI;
 	public name: string = 'Discord';
 
-	private cli: Eris.Client = null;
+	public client: Eris.Client = null;
 
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
 	private config: { [key: string]: any };
 
 	public async onLoad() {
 		console.log('Initializing discord...');
-		this.cli = new Eris.Client(this.config.token, {
+		this.client = new Eris.Client(this.config.token, {
 			autoreconnect: true,
 			firstShardID: 0,
 			maxShards: 1
 		});
 
-		this.api.forwardEvents(this.cli, Object.values(DiscordEvent));
+		this.api.forwardEvents(this.client, Object.values(DiscordEvent));
 
-		await this.cli.connect();
+		await this.client.connect();
 	}
 
 	public async onUnload() {
-		this.cli.disconnect({ reconnect: false });
-		this.cli.removeAllListeners();
-		this.cli = null;
+		this.client.disconnect({ reconnect: false });
+		this.client.removeAllListeners();
+		this.client = null;
 	}
 
 	public async getUser(id: string): Promise<User> {
-		let user: User = this.cli.users.get(id);
+		let user: User = this.client.users.get(id);
 		if (!user) {
-			user = await this.cli.getRESTUser(id);
-			this.cli.users.set(user.id, user);
+			user = await this.client.getRESTUser(id);
+			this.client.users.set(user.id, user);
 		}
 		return user;
 	}
