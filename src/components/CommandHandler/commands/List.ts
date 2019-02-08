@@ -18,7 +18,7 @@ export class List implements Command {
 
 	public prefix: boolean = true;
 
-	public lastSent: { [key: string]: string };
+	public lastSent: { [key: string]: { date: number, id: string } };
 
 	public async onLoad() {
 		this.lastSent = {};
@@ -26,28 +26,68 @@ export class List implements Command {
 
 	public async execute({ channel, args }: CommandExecute) {
 		const db: any = this.api.getPlugin('Database');
-		const page = Number(args[0]) + 1;
+		const discord: any = this.api.getComponent('Discord');
+
+		const page = args[0] ? Number(args[0]) - 1 : 0;
 		const limit = 10;
-		const users: any[] = await db.user.findAll({
-			include: [{
-				model: db.user_line,
-				where: { userId: db.sequelize.col('user.userId') },
-				attributes: [
-					[db.sequelize.fn('array_length', db.sequelize.col('formattedLines')), 'lineCount']
-				]
-			}],
+		const res = await db.user.findAndCountAll({
 			attributes: {
 				include: [
-					[db.sequelize.fn('SUM', db.sequelize.col('lineCount')), 'lineSum'],
-					[db.sequelize.fn('COUNT', db.sequelize.col('user.userId')), 'totalCount']
-				]
+					[db.Sequelize.fn('COUNT', db.Sequelize.col('user.userId')), 'lineCount']
+				],
 			},
+			include: [{
+				model: db.user_line, attributes: []
+			}],
+			group: ['user.userId'],
 			order: [
-				['lineSum', 'DESC']
+				[db.Sequelize.col('lineCount'), 'DESC']
 			],
 			limit,
-			offset: limit * page
+			offset: limit * page,
+			subQuery: false
 		});
-		console.meta({ depth: 5 }).log(users.map(u => u.dataValues));
+		const total: number = res.count.length;
+		const users: any[] = res.rows;
+		const pages: number = Math.floor(total / limit);
+		let output: string[] = [];
+		let lengths = {
+			name: 0,
+			lines: 0,
+			uses: 0
+		}
+		let userNames: {[key: string]: string} = {};
+		for (const user of users) {
+			const duser = await discord.getUser(user.userId);
+			if (duser) {
+				userNames[user.userId] = `${user.name} (${duser.username}#${duser.discriminator})`;
+			} else {
+				userNames[user.userId] = `${user.name} (unknown#0000)`;
+			}
+
+			if (userNames[user.userId].length > lengths.name) {
+				lengths.name = userNames[user.userId].length;
+			}
+			if (user.uses.toString().length > lengths.uses) {
+				lengths.uses = user.uses.toString().length;
+			}
+			if (user.dataValues.lineCount.length > lengths.lines) {
+				lengths.lines = user.dataValues.lineCount.length;
+			}
+		}
+		output.push(`I've markoved the following people:`, '```');
+		for (const user of users) {
+			output.push(`${userNames[user.userId].padEnd(lengths.name, ' ')} | ${user.dataValues.lineCount.padStart(lengths.lines, ' ')} lines | ${user.uses.toString().padStart(lengths.uses, ' ')} uses`);
+		}
+		output.push('```', `Page **${page + 1}**/**${pages}**`);
+
+		let key = `${channel.guild.id}.${channel.id}`;
+		if (this.lastSent[key]) {
+			if (Date.now() - this.lastSent[key].date <= 60000) {
+				await channel.deleteMessage(this.lastSent[key].id);
+			}
+		} 
+		await channel.createMessage(output.join('\n'));
+		// console.meta({ depth: 5 }).log(users.map(u => u.dataValues));
 	}
 }
