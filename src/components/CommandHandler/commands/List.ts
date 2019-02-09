@@ -49,7 +49,7 @@ export class List implements Command {
 		});
 		const total: number = res.count.length;
 		const users: any[] = res.rows;
-		const pages: number = Math.floor(total / limit);
+		const pages: number = Math.ceil(total / limit);
 		let output: string[] = [];
 		let lengths = {
 			name: 0,
@@ -87,7 +87,8 @@ export class List implements Command {
 				await channel.deleteMessage(this.lastSent[key].id);
 			}
 		} 
-		await channel.createMessage(output.join('\n'));
+		const msg = await channel.createMessage(output.join('\n'));
+		this.lastSent[key] = {date: Date.now(), id: msg.id};
 		// console.meta({ depth: 5 }).log(users.map(u => u.dataValues));
 	}
 }
