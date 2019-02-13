@@ -27,7 +27,8 @@ export class Discord {
 		this.client = new Eris.Client(this.config.token, {
 			autoreconnect: true,
 			firstShardID: 0,
-			maxShards: 1
+			maxShards: 1,
+			restMode: true
 		});
 
 		this.api.forwardEvents(this.client, Object.values(DiscordEvent));

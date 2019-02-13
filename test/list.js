@@ -1,27 +1,27 @@
 const db = require('../models');
 
 (async function () {
-	const limit = 10;
+	const limit = 1;
 	const page = 0;
-	const users = await db.user.findAll({
-		include: [
-			{
-				model: db.user_line,
-				// attributes: ['userId', 'messageId']
-			}
+	const users = await db.user.findAndCountAll({
+		attributes: {
+			include: [
+				[db.Sequelize.fn('COUNT', db.Sequelize.col('user.userId')), 'lineCount']
+			],
+		},
+		include: [{
+			model: db.user_line, attributes: []
+		}],
+		group: ['user.userId'],
+		order: [
+			[db.Sequelize.col('lineCount'), 'DESC']
 		],
-		attributes: [
-			// 'user.userId', 'name', 'aliases', 'idAliases'
-			'user.*', 'user_lines.*',
-			[db.sequelize.fn('COUNT', db.sequelize.col('user_lines.messageId')), 'lineSum'],
-			// [db.sequelize.fn('COUNT', db.sequelize.col('user.userId')), 'totalCount']
-		],
-		// order: [
-		// 	['lineSum', 'DESC']
-		// ],
-		// limit,
-		// offset: limit * page,
-		group: [db.sequelize.col('user.userId')]
+		limit,
+		offset: limit * page,
+		subQuery: false
 	});
-	console.dir(users.map(u => u.dataValues));
-})();
+	console.dir(users.count);
+	console.dir(users.rows.map(u => u.dataValues));
+})().catch(err => {
+	console.error(err.message,'\n', err.sql);	
+});
