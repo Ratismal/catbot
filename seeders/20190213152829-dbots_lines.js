@@ -34,8 +34,10 @@ module.exports = {
     userInserts.push({
       userId: '518070897295228959',
       name: 'dbots',
+      showDiscrim: false,
+      loggingActive: false,
       createdAt: Sequelize.fn('now'),
-      updatedAt: Sequelize.fn('now')
+      updatedAt: Sequelize.fn('now'),
     });
     let mid = 1;
     for (const line of dbots.lines) {

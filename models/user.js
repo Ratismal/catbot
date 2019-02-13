@@ -23,6 +23,21 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
       defaultValue: 0
+    },
+    showDiscrim: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
+    loggingActive: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
+    active: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
     }
   }, {});
   user.associate = function (models) {
