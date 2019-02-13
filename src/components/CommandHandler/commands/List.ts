@@ -50,17 +50,19 @@ export class List implements Command {
 		const total: number = res.count.length;
 		const users: any[] = res.rows;
 		const pages: number = Math.ceil(total / limit);
-		let output: string[] = [];
-		let lengths = {
+		const output: string[] = [];
+		const lengths = {
 			name: 0,
 			lines: 0,
 			uses: 0
-		}
-		let userNames: {[key: string]: string} = {};
+		};
+		const userNames: { [key: string]: string } = {};
 		for (const user of users) {
 			const duser = await discord.getUser(user.userId);
 			if (duser) {
-				userNames[user.userId] = `${user.name} (${duser.username}#${duser.discriminator})`;
+				let name = duser.username;
+				if (user.showDiscrim) name += '#' + duser.discriminator;
+				userNames[user.userId] = `${user.name} (${name})`;
 			} else {
 				userNames[user.userId] = `${user.name} (unknown#0000)`;
 			}
@@ -86,9 +88,9 @@ export class List implements Command {
 			if (Date.now() - this.lastSent[key].date <= 60000) {
 				await channel.deleteMessage(this.lastSent[key].id);
 			}
-		} 
+		}
 		const msg = await channel.createMessage(output.join('\n'));
-		this.lastSent[key] = {date: Date.now(), id: msg.id};
+		this.lastSent[key] = { date: Date.now(), id: msg.id };
 		// console.meta({ depth: 5 }).log(users.map(u => u.dataValues));
 	}
 }

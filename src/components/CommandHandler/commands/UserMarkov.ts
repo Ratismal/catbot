@@ -39,11 +39,13 @@ export class UserMarkov implements Command {
 			if (user.userId === '103347843934212096') {
 				await channel.createMessage(keys.join(' '));
 			} else {
+				let name = duser.username;
+				if (user.showDiscrim) name += '#' + duser.discriminator;
 				await channel.createMessage({
 					content: `Well, ${duser.username} once said...`,
 					embed: {
 						author: {
-							name: `${duser.username}#${duser.discriminator}`,
+							name: `${name}`,
 							icon_url: duser.avatarURL
 						},
 						description: keys.join(' ')

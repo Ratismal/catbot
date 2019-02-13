@@ -29,7 +29,7 @@ export class MarkovUpdater {
 	private ignoredUsers: string[];
 
 	public async onLoad() {
-		console.init('MarkoveUpdater loaded.');
+		console.init('MarkovUpdater loaded.');
 	}
 
 	@SubscribeEvent('Discord', DiscordEvent.MESSAGE_CREATE)
@@ -50,18 +50,18 @@ export class MarkovUpdater {
 		} else if (!this.ignoredUsers.find(u => u === author.id)) {
 			try {
 				const user = await db.findUser(userId);
-				if (user) {
+				if (user && user.loggingActive) {
 					userId = user.userId;
 					this.loggedUsers.push(author.id);
 					cont = true;
-				}
+				} else this.ignoredUsers.push(author.id);
 			} catch (err) {
 				console.error(err);
 			}
-		}
+		} else this.ignoredUsers.push(author.id);
+		const sanitizer: any = this.api.getPlugin('Sanitizer');
 
 		if (cont) {
-			const sanitizer: any = this.api.getPlugin('Sanitizer');
 			const formatted = sanitizer.sanitize(message.content);
 			if (formatted.length > 0) {
 				console.log('Inserting: ', author.username, '|', message.content);
@@ -73,6 +73,39 @@ export class MarkovUpdater {
 				});
 
 				this.api.emit('newLines', userId, formatted);
+			}
+		}
+
+		// check #general of dbots
+		if (message.channel.id === '110373943822540800') {
+			const DBOTS_ID = '518070897295228959';
+			cont = false;
+			if (this.loggedUsers.find(u => u === DBOTS_ID)) {
+				cont = true;
+			} else if (!this.ignoredUsers.find(u => u === DBOTS_ID)) {
+				try {
+					const user = await db.findUser(DBOTS_ID);
+					if (user && user.loggingActive) {
+						userId = user.userId;
+						this.loggedUsers.push(DBOTS_ID);
+						cont = true;
+					} else this.ignoredUsers.push(DBOTS_ID);
+				} catch (err) {
+					console.error(err);
+				}
+			} else this.ignoredUsers.push(DBOTS_ID);
+			if (cont) {
+				const formatted = sanitizer.sanitize(message.content);
+				if (formatted.length > 0) {
+					await db.user_line.create({
+						userId: DBOTS_ID,
+						messageId: message.id,
+						rawMessage: message.content,
+						formattedLines: formatted
+					});
+
+					this.api.emit('newLines', DBOTS_ID, formatted);
+				}
 			}
 		}
 	}
