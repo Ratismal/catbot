@@ -43,6 +43,9 @@ export class List implements Command {
 			order: [
 				[db.Sequelize.col('lineCount'), 'DESC']
 			],
+			where: {
+				active: true
+			},
 			limit,
 			offset: limit * page,
 			subQuery: false

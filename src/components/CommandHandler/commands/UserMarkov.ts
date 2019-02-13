@@ -26,7 +26,7 @@ export class UserMarkov implements Command {
 		const discord: any = this.api.getComponent('Discord');
 		const user = await db.findUserByName(args[0]);
 
-		if (user) {
+		if (user && user.active) {
 			const duser = await discord.getUser(user.userId);
 			await user.increment('uses');
 

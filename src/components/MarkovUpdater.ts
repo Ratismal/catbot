@@ -50,7 +50,7 @@ export class MarkovUpdater {
 		} else if (!this.ignoredUsers.find(u => u === author.id)) {
 			try {
 				const user = await db.findUser(userId);
-				if (user && user.loggingActive) {
+				if (user && user.loggingActive && user.active) {
 					userId = user.userId;
 					this.loggedUsers.push(author.id);
 					cont = true;
@@ -77,15 +77,23 @@ export class MarkovUpdater {
 		}
 
 		// check #general of dbots
+		await this.checkDbots(message);
+	}
+
+	private async checkDbots(message: Message) {
 		if (message.channel.id === '110373943822540800') {
+			const db: any = this.api.getPlugin('Database');
+			const sanitizer: any = this.api.getPlugin('Sanitizer');
+
 			const DBOTS_ID = '518070897295228959';
-			cont = false;
+			let cont = false;
+			let userId: string = DBOTS_ID;
 			if (this.loggedUsers.find(u => u === DBOTS_ID)) {
 				cont = true;
 			} else if (!this.ignoredUsers.find(u => u === DBOTS_ID)) {
 				try {
 					const user = await db.findUser(DBOTS_ID);
-					if (user && user.loggingActive) {
+					if (user && user.loggingActive && user.active) {
 						userId = user.userId;
 						this.loggedUsers.push(DBOTS_ID);
 						cont = true;
@@ -94,9 +102,11 @@ export class MarkovUpdater {
 					console.error(err);
 				}
 			} else this.ignoredUsers.push(DBOTS_ID);
+
 			if (cont) {
 				const formatted = sanitizer.sanitize(message.content);
 				if (formatted.length > 0) {
+					console.log('Inserting', formatted, 'to DBOTS');
 					await db.user_line.create({
 						userId: DBOTS_ID,
 						messageId: message.id,
