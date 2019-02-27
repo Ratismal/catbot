@@ -21,14 +21,20 @@ export class Help implements Command {
 	@Variable({ type: VariableDefinitionType.STRING, name: 'suffix' })
 	private commandSuffix: string;
 
-	public async execute({ channel }: CommandExecute) {
+	public canExecute(arg: CommandExecute): boolean {
+		return true;
+	}
+
+	public async execute(arg: CommandExecute) {
 		const handler: CommandHandler = this.api.getComponent(CommandHandler);
-		await channel.createMessage(`Hi! I'm stupid cat. I'm a pretty stupid cat, see?
+		await arg.channel.createMessage(`Hi! I'm stupid cat. I'm a pretty stupid cat, see?
 
 **Prefix**: \`${this.commandPrefix}\`
-${Array.from(handler.commands.values()).filter(c => c.prefix).map(c => ` - **${c.command}**`).join('\n')}
+${Array.from(handler.commands.values()).filter( c => c.prefix &&  c.canExecute(arg)).map(c => ` - **${c.command}**`).join('\n')}
 
 **Suffix**: \`${this.commandSuffix}\`
 Use the suffix with the names in the 'list' command to execute a markov. For example, \`<name>${this.commandSuffix}\``);
 	}
+
+	
 }

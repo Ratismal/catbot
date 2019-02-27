@@ -16,6 +16,10 @@ export class Ping implements Command {
 
 	public prefix: boolean = true;
 
+	public canExecute(arg: CommandExecute): boolean {
+		return true;
+	}
+
 	public async execute({ channel }: CommandExecute) {
 		await channel.createMessage(`What is that supposed to mean?`);
 	}

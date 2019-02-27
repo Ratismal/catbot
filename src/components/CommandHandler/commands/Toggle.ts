@@ -27,37 +27,39 @@ export class Toggle implements Command {
 	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
 	private ignoredUsers: string[];
 
-	public async execute({ author, channel, args }: CommandExecute) {
-		if (author.id === '103347843934212096') {
-			let name = args[0];
-			let logging = false;
-			if (args[0].toLowerCase() === 'logging') {
-				name = args[1];
-				logging = true;
-			}
-			const db: any = this.api.getPlugin('Database');
+	public canExecute(arg: CommandExecute): boolean {
+		return arg.author.id === '103347843934212096';
+	}
 
-			const user = await db.findUserByName(name.toLowerCase());
-			if (!user) {
-				await channel.createMessage('No markov with that name exists!');
-				return;
-			}
-			if (logging) {
-				user.set('loggingActive', !user.loggingActive);
-			} else {
-				user.set('active', !user.active);
-			}
-			if (user.active && user.loggingActive && !this.loggedUsers.find(u => u === user.userId)) {
-				this.loggedUsers.push(user.userId);
-				const i = this.ignoredUsers.indexOf(user.userId);
-				if (i > -1) this.ignoredUsers.splice(i, 1);
-			} else if ((!user.active || !user.loggingActive) && !this.ignoredUsers.find(u => u === user.userId)) {
-				this.ignoredUsers.push(user.userId);
-				const i = this.loggedUsers.indexOf(user.userId);
-				if (i > -1) this.loggedUsers.splice(i, 1);
-			}
-			await user.save();
-			await channel.createMessage(`Done! ${logging ? 'Logging' : name} is now ${(logging ? user.loggingActive : user.active) ? 'active' : 'inactive'}!`);
+	public async execute({ author, channel, args }: CommandExecute) {
+		let name = args[0];
+		let logging = false;
+		if (args[0].toLowerCase() === 'logging') {
+			name = args[1];
+			logging = true;
 		}
+		const db: any = this.api.getPlugin('Database');
+
+		const user = await db.findUserByName(name.toLowerCase());
+		if (!user) {
+			await channel.createMessage('No markov with that name exists!');
+			return;
+		}
+		if (logging) {
+			user.set('loggingActive', !user.loggingActive);
+		} else {
+			user.set('active', !user.active);
+		}
+		if (user.active && user.loggingActive && !this.loggedUsers.find(u => u === user.userId)) {
+			this.loggedUsers.push(user.userId);
+			const i = this.ignoredUsers.indexOf(user.userId);
+			if (i > -1) this.ignoredUsers.splice(i, 1);
+		} else if ((!user.active || !user.loggingActive) && !this.ignoredUsers.find(u => u === user.userId)) {
+			this.ignoredUsers.push(user.userId);
+			const i = this.loggedUsers.indexOf(user.userId);
+			if (i > -1) this.loggedUsers.splice(i, 1);
+		}
+		await user.save();
+		await channel.createMessage(`Done! ${logging ? 'Logging' : name} is now ${(logging ? user.loggingActive : user.active) ? 'active' : 'inactive'}!`);
 	}
 }

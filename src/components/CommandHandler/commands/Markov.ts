@@ -16,6 +16,10 @@ export class Markov implements Command {
 
 	public prefix: boolean = true;
 
+	public canExecute(arg: CommandExecute): boolean {
+		return true;
+	}
+
 	public async execute({ channel }: CommandExecute) {
 		await channel.createMessage(`I'll explain how a markov chain works.
 \`\`\`Look at the banana.

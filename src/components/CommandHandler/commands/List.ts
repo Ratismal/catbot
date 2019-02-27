@@ -24,6 +24,10 @@ export class List implements Command {
 		this.lastSent = {};
 	}
 
+	public canExecute(arg: CommandExecute): boolean {
+		return true;
+	}
+
 	public async execute({ channel, args }: CommandExecute) {
 		const db: any = this.api.getPlugin('Database');
 		const discord: any = this.api.getComponent('Discord');

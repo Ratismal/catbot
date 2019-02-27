@@ -85,7 +85,9 @@ export class CommandHandler {
 				client: this.client
 			};
 			try {
-				await command.execute(execute);
+				if (await command.canExecute(execute)) {
+					await command.execute(execute);
+				}
 			} catch (err) {
 				console.error('Command Error:', err);
 			}
