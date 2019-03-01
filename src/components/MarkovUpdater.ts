@@ -27,7 +27,9 @@ export class MarkovUpdater {
 	private loggedUsers: string[];
 	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
 	private ignoredUsers: string[];
-
+	@Variable({ type: VariableDefinitionType.ARRAY, name: 'aliasedUsers' })
+	private aliasedUsers: { [key: string]: string };
+	
 	public async onLoad() {
 		console.init('MarkovUpdater loaded.');
 	}
@@ -43,6 +45,7 @@ export class MarkovUpdater {
 		const db: any = this.api.getPlugin('Database');
 
 		let userId: string = author.id;
+		if (this.aliasedUsers[userId]) userId = this.aliasedUsers[userId];
 
 		let cont: boolean = false;
 		if (this.loggedUsers.find(u => u === author.id)) {
@@ -52,7 +55,10 @@ export class MarkovUpdater {
 				const user = await db.findUserById(userId);
 				if (user && user.loggingActive && user.active) {
 					userId = user.userId;
-					this.loggedUsers.push(author.id);
+					for (const alias of user.get('idAliases')) {
+						this.aliasedUsers[alias] = user.userId;
+					}
+					this.loggedUsers.push(userId);
 					cont = true;
 				} else this.ignoredUsers.push(author.id);
 			} catch (err) {

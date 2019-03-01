@@ -29,12 +29,13 @@ export class Database {
 	}
 
 	async findUserByName(name: string) {
+		let n = name.toLowerCase();
 		const where = {
 			[db.Sequelize.Op.or]: [
-				{ name },
+				{ name: n },
 				{
 					aliases: {
-						[db.Sequelize.Op.contains]: [name]
+						[db.Sequelize.Op.contains]: [n]
 					}
 				}
 			]
@@ -75,11 +76,13 @@ export class Database {
 	}
 
 	async findUser(query: string) {
+		let n = query.toLowerCase();
+
 		const conditions: any[] = [
-			{ name: query },
+			{ name: n },
 			{
 				aliases: {
-					[db.Sequelize.Op.contains]: [query]
+					[db.Sequelize.Op.contains]: [n]
 				}
 			}
 		];

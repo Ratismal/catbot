@@ -13,6 +13,7 @@ const config = require('../config.json');
 
 	bento.setVariable('loggedUsers', []);
 	bento.setVariable('ignoredUsers', []);
+	bento.setVariable('aliasedUsers', []);
 
 	bento.setVariable('prefix', config.prefix || 'cat');
 	bento.setVariable('suffix', config.suffix || 'pls');
