@@ -49,7 +49,7 @@ export class MarkovUpdater {
 			cont = true;
 		} else if (!this.ignoredUsers.find(u => u === author.id)) {
 			try {
-				const user = await db.findUser(userId);
+				const user = await db.findUserById(userId);
 				if (user && user.loggingActive && user.active) {
 					userId = user.userId;
 					this.loggedUsers.push(author.id);
@@ -92,7 +92,7 @@ export class MarkovUpdater {
 				cont = true;
 			} else if (!this.ignoredUsers.find(u => u === DBOTS_ID)) {
 				try {
-					const user = await db.findUser(DBOTS_ID);
+					const user = await db.findUserById(DBOTS_ID);
 					if (user && user.loggingActive && user.active) {
 						userId = user.userId;
 						this.loggedUsers.push(DBOTS_ID);

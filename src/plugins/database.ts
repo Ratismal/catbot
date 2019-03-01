@@ -28,7 +28,7 @@ export class Database {
 		return db.Sequelize.Op;
 	}
 
-	async findUserByName(name: string) {
+	async findUserByName(name: string, log: boolean = true) {
 		const where = {
 			[db.Sequelize.Op.or]: [
 				{ name },
@@ -45,13 +45,14 @@ export class Database {
 				where
 			});
 		} catch (err) {
-			console.error(err);
+			if (log)
+				console.error(err);
 			// console.log(where);
 			return null;
 		}
 	}
 
-	async findUser(userId: string) {
+	async findUserById(userId: string, log: boolean = true) {
 		const where = {
 			[db.Sequelize.Op.or]: [
 				{ userId: userId },
@@ -68,9 +69,17 @@ export class Database {
 				where
 			});
 		} catch (err) {
-			console.error(err);
+			if (log)
+				console.error(err);
 			// console.log(where);
 			return null;
 		}
+	}
+
+	async findUser(query: string) {
+		let user = await this.findUserByName(query, false);
+		if (!user) user = await this.findUserById(query, false);
+
+		return user || null;
 	}
 }

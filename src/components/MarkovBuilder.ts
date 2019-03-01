@@ -60,7 +60,7 @@ export class MarkovBuilder {
 	private async buildMarkov(userId: string) {
 		const db: any = this.api.getPlugin('Database');
 
-		const user = await db.findUser(userId);
+		const user = await db.findUserById(userId);
 
 		if (!user) throw Error('Markov did not exist.');
 
