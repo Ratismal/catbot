@@ -23,12 +23,14 @@
     "@ayana/bento": "^1.0.0-alpha.14",
     "cat-loggr": "^1.0.10",
     "cat-markov": "^1.0.0",
+    "catflake": "^1.0.0",
     "eris": "^0.8.6",
     "moment": "^2.22.2",
     "pg": "^7.8.0",
     "rethinkdbdash": "^2.3.31",
     "sequelize": "^4.42.0",
-    "sequelize-cli": "^5.4.0"
+    "sequelize-cli": "^5.4.0",
+    "snekfetch": "^4.0.4"
   },
   "devDependencies": {
     "@ayana/tslint-config": "^1.0.0",

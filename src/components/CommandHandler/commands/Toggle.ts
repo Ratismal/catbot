@@ -34,9 +34,14 @@ export class Toggle implements Command {
 	public async execute({ author, channel, args }: CommandExecute) {
 		let name = args[0];
 		let logging = false;
+		let discrim = false;
 		if (args[0].toLowerCase() === 'logging') {
 			name = args[1];
 			logging = true;
+		}
+		else if (args[0].toLowerCase() === 'discrim') {
+			name = args[1];
+			discrim = true;
 		}
 		const db: any = this.api.getPlugin('Database');
 
@@ -47,6 +52,8 @@ export class Toggle implements Command {
 		}
 		if (logging) {
 			user.set('loggingActive', !user.loggingActive);
+		} else if (discrim) {
+			user.set('showDiscrim', !user.showDiscrim);
 		} else {
 			user.set('active', !user.active);
 		}
