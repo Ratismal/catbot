@@ -28,7 +28,8 @@ export class Discord {
 			autoreconnect: true,
 			firstShardID: 0,
 			maxShards: 1,
-			restMode: true
+			restMode: true,
+			defaultImageFormat: 'png'
 		});
 
 		this.api.forwardEvents(this.client, Object.values(DiscordEvent));

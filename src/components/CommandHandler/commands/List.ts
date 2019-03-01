@@ -33,6 +33,10 @@ export class List implements Command {
 		const discord: any = this.api.getComponent('Discord');
 
 		const page = args[0] ? Number(args[0]) - 1 : 0;
+		if (isNaN(page)) {
+			await channel.createMessage('Invalid page number.');
+			return;
+		}
 		const limit = 10;
 		const res = await db.user.findAndCountAll({
 			attributes: {
