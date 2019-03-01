@@ -60,9 +60,16 @@ export class Populate implements Command {
 
         try {
             const res = await snekfetch.get(args[1]);
-            const lines = res.body;
+            let lines = res.body;
+            if (lines instanceof Buffer) {
+                lines = lines.toString('utf8').split('\n');
+            } else if (typeof lines === 'string') lines = lines.split('\n');
+            else if (!Array.isArray(lines)) {
+                await channel.createMessage('Please provide a json array or a newline-delimited text file');
+                return;
+            }
 
-            console.log(lines.length);
+            console.log('Found',lines.length,'lines.');
             const inserts: any[] = [];
             const flines: string[] = [];
 
