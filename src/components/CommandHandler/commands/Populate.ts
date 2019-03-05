@@ -97,7 +97,7 @@ export class Populate implements Command {
 
             await channel.createMessage('ok');
         } catch (err) {
-            console.error(err, err.body);
+            console.error(err, err.body ? err.body.toString() : null);
             await channel.createMessage(err.message);
         }
     }
