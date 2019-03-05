@@ -1,8 +1,8 @@
 import {
-	Component,
-	ComponentAPI,
-	Variable,
-	VariableDefinitionType
+    Component,
+    ComponentAPI,
+    Variable,
+    VariableDefinitionType
 } from '@ayana/bento';
 
 import { CommandHandler } from '../CommandHandler';
@@ -17,28 +17,28 @@ const console = Loggr.get('C: Populate');
 const snekfetch = require('snekfetch');
 
 export class Populate implements Command {
-	public api: ComponentAPI;
-	public name: string = 'Populate';
+    public api: ComponentAPI;
+    public name: string = 'Populate';
 
-	public parent: Component = CommandHandler;
-	public plugins: string[] = ['Database', 'Sanitizer'];
-	public dependencies: string[] = ['MarkovBuilder'];
+    public parent: Component = CommandHandler;
+    public plugins: string[] = ['Database', 'Sanitizer'];
+    public dependencies: string[] = ['MarkovBuilder'];
 
-	public command: string = 'populate';
+    public command: string = 'populate';
 
-	public prefix: boolean = true;
+    public prefix: boolean = true;
 
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
-	private loggedUsers: string[];
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
-	private ignoredUsers: string[];
+    @Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
+    private loggedUsers: string[];
+    @Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
+    private ignoredUsers: string[];
 
-	public canExecute(arg: CommandExecute): boolean {
-		return arg.author.id === '103347843934212096';
+    public canExecute(arg: CommandExecute): boolean {
+        return arg.author.id === '103347843934212096';
     }
-    
+
     private async populate(user: string, lines: string[]) {
-        
+
     }
 
     public async execute({ author, channel, args }: CommandExecute) {
@@ -69,7 +69,7 @@ export class Populate implements Command {
                 return;
             }
 
-            console.log('Found',lines.length,'lines.');
+            console.log('Found', lines.length, 'lines.');
             const inserts: any[] = [];
             const flines: string[] = [];
 
@@ -97,8 +97,8 @@ export class Populate implements Command {
 
             await channel.createMessage('ok');
         } catch (err) {
-            console.error(err);
+            console.error(err, err.body);
             await channel.createMessage(err.message);
         }
-	}
+    }
 }
