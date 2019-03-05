@@ -75,7 +75,6 @@ export class Populate implements Command {
                 await channel.createMessage('Please provide a json array or a newline-delimited text file');
                 return;
             }
-            console.log(lines);
 
             const logs: string[] = [];
             logs.push(`Found ${lines.length} lines from \`${argsPre[1]}\`.`);
