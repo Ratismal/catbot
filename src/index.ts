@@ -19,12 +19,17 @@ const config = require('../config.json');
 	bento.setVariable('suffix', config.suffix || 'pls');
 
 	console.init('Loading CatBot...');
+
+	console.init('Loading component loader...');
 	const fsloader = new FSComponentLoader();
 	await fsloader.addDirectory(__dirname, 'components');
 
+	console.init('Loading plugins...');
 	const _plugins = Object.values(plugins).map(p => new p());
 
+	console.init('Adding plugins...');
 	await bento.addPlugins([fsloader, ..._plugins]);
+	console.init('Verifying...');
 	await bento.verify();
 })().catch(err => {
 	console.fatal('Error encountered while initializing Bento:', err);
