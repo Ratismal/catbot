@@ -31,7 +31,9 @@ const config = require('../config.json');
 	await bento.addPlugins([fsloader, ..._plugins]);
 	console.init('Verifying...');
 	await bento.verify();
+	console.init('Done!');
 })().catch(err => {
+	console.init('Initialization failed.');
 	console.fatal('Error encountered while initializing Bento:', err);
 	process.exit(1);
 });
