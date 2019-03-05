@@ -11,5 +11,6 @@ export interface CommandExecute {
 	channel: TextChannel;
 	author: Member | User;
 	args: Array<string>;
+	argsPre: Array<string>;
 	client: Client;
 }

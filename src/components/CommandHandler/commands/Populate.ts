@@ -41,7 +41,7 @@ export class Populate implements Command {
 
     }
 
-    public async execute({ author, channel, args }: CommandExecute) {
+    public async execute({ author, channel, args, argsPre }: CommandExecute) {
         const db: any = this.api.getPlugin('Database');
         const sanitizer: any = this.api.getPlugin('Sanitizer');
         const MarkovBuilder: any = this.api.getComponent('MarkovBuilder');
@@ -57,17 +57,31 @@ export class Populate implements Command {
             await channel.createMessage('no markov found');
             return;
         }
+        console.log('"%s"', argsPre[1]);
 
         try {
-            const res = await snekfetch.get(args[1]);
+            const res = await snekfetch.get(argsPre[1]);
             let lines = res.body;
             if (lines instanceof Buffer) {
-                lines = lines.toString('utf8').split('\n');
-            } else if (typeof lines === 'string') lines = lines.split('\n');
+                lines = lines.toString('utf8');
+                try {
+                    lines = JSON.parse(lines);
+                } catch (err) {
+                    lines = lines.split('\n');
+                }
+            }
+            if (typeof lines === 'string') lines = lines.split('\n');
             else if (!Array.isArray(lines)) {
                 await channel.createMessage('Please provide a json array or a newline-delimited text file');
                 return;
             }
+            console.log(lines);
+
+            const logs: string[] = [];
+            logs.push(`Found ${lines.length} lines from \`${argsPre[1]}\`.`);
+            logs.push(`Formatting...`);
+
+            const m = await channel.createMessage(logs.join('\n'));
 
             console.log('Found', lines.length, 'lines.');
             const inserts: any[] = [];
@@ -89,13 +103,20 @@ export class Populate implements Command {
                 }
             }
 
+            logs.push(`Created ${inserts.length} lines to insert.`, 'Inserting...');
+            await m.edit(logs.join('\n'));
+
             await db.user_line.bulkCreate(inserts);
+
+            logs.push('Seeding...');
+            await m.edit(logs.join('\n'));
 
             const markov = MarkovBuilder.getMarkov(user.userId);
             if (markov)
                 markov.seed(flines);
 
-            await channel.createMessage('ok');
+            logs.push('Done!');
+            await m.edit(logs.join('\n'));
         } catch (err) {
             console.error(err, err.body ? err.body.toString() : null);
             await channel.createMessage(err.message);
