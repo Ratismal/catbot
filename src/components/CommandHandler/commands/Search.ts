@@ -40,6 +40,8 @@ export class Search implements Command {
 		const user = await db.findUserByName(args[0]);
 
 		if (user && user.active) {
+			await channel.sendTyping();
+
 			const duser = await discord.getUser(user.userId);
 			await user.increment('uses');
 
@@ -63,16 +65,20 @@ export class Search implements Command {
 
 			let name = duser.username;
 			if (user.showDiscrim) name += '#' + duser.discriminator;
-			await channel.createMessage({
-				content: `Well, ${duser.username} once said...`,
-				embed: {
-					author: {
-						name: `${name}`,
-						icon_url: duser.avatarURL
-					},
-					description: keys.join(' ')
-				}
-			});
+			if (user.userId === '103347843934212096') {
+				await channel.createMessage(keys.join(' '));
+			} else {
+				await channel.createMessage({
+					content: `Well, ${duser.username} once said...`,
+					embed: {
+						author: {
+							name: `${name}`,
+							icon_url: duser.avatarURL
+						},
+						description: keys.join(' ')
+					}
+				});
+			}
 		} else {
 			await channel.createMessage('Sorry, I don\'t know that person...');
 		}

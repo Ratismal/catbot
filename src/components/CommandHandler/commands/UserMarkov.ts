@@ -31,6 +31,8 @@ export class UserMarkov implements Command {
 		const user = await db.findUserByName(args[0]);
 
 		if (user && user.active) {
+			await channel.sendTyping();
+
 			const duser = await discord.getUser(user.userId);
 			await user.increment('uses');
 
