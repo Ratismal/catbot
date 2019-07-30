@@ -50,7 +50,7 @@ export class UserMarkov implements Command {
 				let name = duser.username;
 				if (user.showDiscrim) name += '#' + duser.discriminator;
 				let lines = [`Well, ${duser.username} once said...`];
-				lines.push(`> ${icon} **${name}**`);
+				lines.push(`> ${icon}  **${name}**`);
 				lines.push(`> ${keys.join(' ')}`);
 				await channel.createMessage(lines.join('\n'));
 			}
