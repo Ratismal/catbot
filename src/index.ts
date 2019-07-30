@@ -11,7 +11,9 @@ const config = require('../config.json');
 	console.init('Setting initial variables...');
 	bento.setVariable('_config', config);
 
+	bento.setVariable('storage', config.storage || []);
 	bento.setVariable('loggedUsers', []);
+
 	bento.setVariable('ignoredUsers', []);
 	bento.setVariable('aliasedUsers', []);
 

@@ -16,7 +16,7 @@ export class UserMarkov implements Command {
 
 	public command: string = '_usermarkov';
 
-	public dependencies: string[] = ['MarkovBuilder', 'Discord'];
+	public dependencies: string[] = ['MarkovBuilder', 'Discord', 'IconHandler'];
 	public plugins: string[] = ['Database'];
 
 	public prefix: boolean = false;
@@ -28,6 +28,7 @@ export class UserMarkov implements Command {
 	public async execute({ channel, args }: CommandExecute) {
 		const db: any = this.api.getPlugin('Database');
 		const discord: any = this.api.getComponent('Discord');
+		const iconHandler: any = this.api.getComponent('IconHandler');
 		const user = await db.findUserByName(args[0]);
 
 		if (user && user.active) {
@@ -45,18 +46,13 @@ export class UserMarkov implements Command {
 			if (user.userId === '103347843934212096') {
 				await channel.createMessage(keys.join(' '));
 			} else {
+				const icon = await iconHandler.getIcon(args[0], duser);
 				let name = duser.username;
 				if (user.showDiscrim) name += '#' + duser.discriminator;
-				await channel.createMessage({
-					content: `Well, ${duser.username} once said...`,
-					embed: {
-						author: {
-							name: `${name}`,
-							icon_url: duser.avatarURL
-						},
-						description: keys.join(' ')
-					}
-				});
+				let lines = [`Well, ${duser.username} once said...`];
+				lines.push(`> ${icon} **${name}**`);
+				lines.push(`> ${keys.join(' ')}`);
+				await channel.createMessage(lines.join('\n'));
 			}
 		}
 	}

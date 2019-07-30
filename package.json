@@ -25,6 +25,7 @@
     "cat-markov": "^1.0.0",
     "catflake": "^1.0.0",
     "eris": "^0.8.6",
+    "jimp": "^0.6.4",
     "moment": "^2.22.2",
     "pg": "^7.8.0",
     "rethinkdbdash": "^2.3.31",
