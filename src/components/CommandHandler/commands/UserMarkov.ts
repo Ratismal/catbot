@@ -49,7 +49,7 @@ export class UserMarkov implements Command {
 				const icon = await iconHandler.getIcon(args[0], duser);
 				let name = duser.username;
 				if (user.showDiscrim) name += '#' + duser.discriminator;
-				let lines = [`Well, ${duser.username} once said...`];
+				let lines = [`Well, ${user.name} once said...`];
 				lines.push(`> ${icon}  **${name}**`);
 				lines.push(`> ${keys.join(' ')}`);
 				await channel.createMessage(lines.join('\n'));
