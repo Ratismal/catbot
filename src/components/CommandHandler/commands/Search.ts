@@ -13,7 +13,7 @@ export class Search implements Command {
 
 	public parent: Component = CommandHandler;
 
-	public dependencies: string[] = ['MarkovBuilder', 'Discord'];
+	public dependencies: string[] = ['MarkovBuilder', 'Discord', 'IconHandler'];
 	public plugins: string[] = ['Database', 'Sanitizer'];
 
 	public command: string = 'search';
@@ -27,6 +27,7 @@ export class Search implements Command {
 	public async execute({ args, channel }: CommandExecute) {
 		const db: any = this.api.getPlugin('Database');
 		const discord: any = this.api.getComponent('Discord');
+		const iconHandler: any = this.api.getComponent('IconHandler');
 
 		if (!args[0]) {
 			await channel.createMessage('You must provide a name!');
@@ -63,22 +64,7 @@ export class Search implements Command {
 			// console.log(markov);
 			const keys = markov.fill(startKey, 15);
 
-			let name = duser.username;
-			if (user.showDiscrim) name += '#' + duser.discriminator;
-			if (user.userId === '103347843934212096') {
-				await channel.createMessage(keys.join(' '));
-			} else {
-				await channel.createMessage({
-					content: `Well, ${duser.username} once said...`,
-					embed: {
-						author: {
-							name: `${name}`,
-							icon_url: duser.avatarURL
-						},
-						description: keys.join(' ')
-					}
-				});
-			}
+			await channel.createMessage(await iconHandler.getOutput(user, duser, keys.join(' ')));
 		} else {
 			await channel.createMessage('Sorry, I don\'t know that person...');
 		}

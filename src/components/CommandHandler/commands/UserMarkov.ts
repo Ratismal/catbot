@@ -43,17 +43,7 @@ export class UserMarkov implements Command {
 			const keys = markov.create(3, 15);
 			// const statement = markov.markov.fill(key, 20);
 			// console.log(key, statement);
-			if (user.userId === '103347843934212096') {
-				await channel.createMessage(keys.join(' '));
-			} else {
-				const icon = await iconHandler.getIcon(args[0], duser);
-				let name = duser.username;
-				if (user.showDiscrim) name += '#' + duser.discriminator;
-				let lines = [`Well, ${user.name} once said...`];
-				lines.push(`> ${icon}  **${name}**`);
-				lines.push(`> ${keys.join(' ')}`);
-				await channel.createMessage(lines.join('\n'));
-			}
+			await channel.createMessage(await iconHandler.getOutput(user, duser, keys.join(' ')));
 		}
 	}
 }

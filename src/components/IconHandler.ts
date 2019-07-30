@@ -81,4 +81,18 @@ export class IconHandler {
 		}
 		return emote ? `<:${emote.name}:${emote.id}>` : '';
 	}
+
+	public async getOutput(user: any, duser: any, text: string) {
+		if (user.userId === '103347843934212096') {
+			return text;
+		} else {
+			const icon = await this.getIcon(user.name, duser);
+			let name = duser.username;
+			if (user.showDiscrim) name += '#' + duser.discriminator;
+			let lines = [`Well, ${user.name} once said...`];
+			lines.push(`> ${icon}  **${name}**`);
+			lines.push(`> ${text}`);
+			return lines.join('\n');
+		}
+	}
 }
