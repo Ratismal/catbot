@@ -41,14 +41,13 @@ export class IconHandler {
 		return this.getClient().guilds.filter(g => this.storage.includes(g.id));
 	}
 
-	public findEmote(name: string): Eris.Emoji {
+	public findEmote(name: string): [Eris.Emoji, Eris.Guild] {
 		const guilds = this.getGuilds();
 		let emote: Eris.Emoji;
 		for (const guild of guilds) {
 			emote = guild.emojis.find(e => e.name.toLowerCase() === name.toLowerCase());
-			if (emote) break;
+			if (emote) return [emote, guild];
 		}
-		return emote;
 	}
 
 	onLoad() {
@@ -73,7 +72,7 @@ export class IconHandler {
 	public async getIcon(name: string, user: Eris.User): Promise<string> {
 		const client = this.getClient();
 		const guilds = client.guilds.filter(g => this.storage.includes(g.id));
-		let emote: any = this.findEmote(name);
+		let [emote]: any = this.findEmote(name);
 
 		if (!emote) {
 			const guild = guilds.find(g => g.emojis.length < 50);

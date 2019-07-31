@@ -40,8 +40,9 @@ export class Icon implements Command {
 
 		const name: string = user.name;
 
-		const oldEmote: any = iconHandler.findEmote(name);
+		const [oldEmote, guild]: any = iconHandler.findEmote(name);
 
+		console.log(oldEmote);
 		let url;
 		if (message.attachments.length > 0) url = message.attachments[0].url;
 		else url = args[0] || duser.avatarURL;
@@ -49,7 +50,7 @@ export class Icon implements Command {
 
 		try {
 			const image = await iconHandler.createImage(url);
-			const emote: any = await channel.guild.createEmoji({
+			const emote: any = await guild.createEmoji({
 				name, image
 			});
 
@@ -61,7 +62,7 @@ export class Icon implements Command {
 
 			await channel.createMessage(lines.join(' '));
 			if (oldEmote)
-				await channel.guild.deleteEmoji(oldEmote.id);
+				await guild.deleteEmoji(oldEmote.id);
 		} catch (err) {
 			console.error(err);
 			await channel.createMessage('I was unable to update your icon. Please send me a valid link to an image!');
