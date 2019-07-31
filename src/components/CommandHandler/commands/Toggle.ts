@@ -14,6 +14,7 @@ const console = Loggr.get('C: Toggle');
 export class Toggle implements Command {
 	public api: ComponentAPI;
 	public name: string = 'Toggle';
+	public desc: string = 'Does toggly stuff: `[ logging | discrim ]`';
 
 	public parent: Component = CommandHandler;
 	public plugins: string[] = ['Database'];

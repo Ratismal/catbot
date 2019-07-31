@@ -9,6 +9,7 @@ const console = Loggr.get('C: Ping');
 export class Ping implements Command {
 	public api: ComponentAPI;
 	public name: string = 'Ping';
+	public desc: string = 'Hmm...';
 
 	public parent: Component = CommandHandler;
 

@@ -9,6 +9,7 @@ const console = Loggr.get('C: MarkovDesc');
 export class Markov implements Command {
 	public api: ComponentAPI;
 	public name: string = 'Markov';
+	public desc: string = 'Explains how a markov works';
 
 	public parent: Component = CommandHandler;
 

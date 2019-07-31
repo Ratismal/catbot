@@ -9,6 +9,7 @@ const console = Loggr.get('C: Help');
 export class Help implements Command {
 	public api: ComponentAPI;
 	public name: string = 'Help';
+	public desc: string = 'I\'m not sure what this one does...';
 
 	public parent: Component = CommandHandler;
 
@@ -30,11 +31,11 @@ export class Help implements Command {
 		await arg.channel.createMessage(`Hi! I'm stupid cat. I'm a pretty stupid cat, see?
 
 **Prefix**: \`${this.commandPrefix}\`
-${Array.from(handler.commands.values()).filter( c => c.prefix &&  c.canExecute(arg)).map(c => ` - **${c.command}**`).join('\n')}
+${Array.from(handler.commands.values()).filter(c => c.prefix && c.canExecute(arg)).map(c => ` - **${c.command}** | ${c.desc}`).join('\n')}
 
 **Suffix**: \`${this.commandSuffix}\`
 Use the suffix with the names in the 'list' command to execute a markov. For example, \`<name>${this.commandSuffix}\``);
 	}
 
-	
+
 }

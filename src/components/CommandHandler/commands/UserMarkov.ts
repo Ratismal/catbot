@@ -11,6 +11,7 @@ const console = Loggr.get('C: User Markov');
 export class UserMarkov implements Command {
 	public api: ComponentAPI;
 	public name: string = 'UserMarkov';
+	public desc: string = 'yes';
 
 	public parent: Component = CommandHandler;
 

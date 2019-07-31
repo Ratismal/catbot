@@ -1,8 +1,8 @@
 import {
-	Component,
-	ComponentAPI,
-	Variable,
-	VariableDefinitionType
+    Component,
+    ComponentAPI,
+    Variable,
+    VariableDefinitionType
 } from '@ayana/bento';
 
 import { CommandHandler } from '../CommandHandler';
@@ -12,24 +12,26 @@ import Loggr from '../../../loggr';
 const console = Loggr.get('C: Toggle');
 
 export class Add implements Command {
-	public api: ComponentAPI;
-	public name: string = 'Add';
+    public api: ComponentAPI;
+    public name: string = 'Add';
 
-	public parent: Component = CommandHandler;
-	public plugins: string[] = ['Database'];
+    public desc: string = 'Adds a markov: `<id> <name>`';
 
-	public command: string = 'add';
+    public parent: Component = CommandHandler;
+    public plugins: string[] = ['Database'];
 
-	public prefix: boolean = true;
+    public command: string = 'add';
 
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
-	private loggedUsers: string[];
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
-	private ignoredUsers: string[];
+    public prefix: boolean = true;
 
-	public canExecute(arg: CommandExecute): boolean {
-		return arg.author.id === '103347843934212096';
-	}
+    @Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
+    private loggedUsers: string[];
+    @Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
+    private ignoredUsers: string[];
+
+    public canExecute(arg: CommandExecute): boolean {
+        return arg.author.id === '103347843934212096';
+    }
 
     public async execute({ author, channel, args }: CommandExecute) {
         const db: any = this.api.getPlugin('Database');
@@ -58,5 +60,5 @@ export class Add implements Command {
         }
 
         await channel.createMessage('ok');
-	}
+    }
 }

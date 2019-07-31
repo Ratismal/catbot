@@ -10,6 +10,7 @@ const console = Loggr.get('C: Search');
 export class Search implements Command {
 	public api: ComponentAPI;
 	public name: string = 'Search';
+	public desc: string = 'Searches a markov for a term: `<name> <term>`';
 
 	public parent: Component = CommandHandler;
 

@@ -1,8 +1,8 @@
 import {
-	Component,
-	ComponentAPI,
-	Variable,
-	VariableDefinitionType
+    Component,
+    ComponentAPI,
+    Variable,
+    VariableDefinitionType
 } from '@ayana/bento';
 
 import { CommandHandler } from '../CommandHandler';
@@ -12,28 +12,29 @@ import Loggr from '../../../loggr';
 const console = Loggr.get('C: Toggle');
 
 export class Alias implements Command {
-	public api: ComponentAPI;
-	public name: string = 'Alias';
+    public api: ComponentAPI;
+    public name: string = 'Alias';
+    public desc: string = 'Adds a markov alias: `<name> <alias>`';
 
-	public parent: Component = CommandHandler;
-	public plugins: string[] = ['Database'];
+    public parent: Component = CommandHandler;
+    public plugins: string[] = ['Database'];
 
-	public command: string = 'alias';
+    public command: string = 'alias';
 
-	public prefix: boolean = true;
+    public prefix: boolean = true;
 
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
-	private loggedUsers: string[];
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
-	private ignoredUsers: string[];
+    @Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
+    private loggedUsers: string[];
+    @Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
+    private ignoredUsers: string[];
     @Variable({ type: VariableDefinitionType.ARRAY, name: 'aliasedUsers' })
     private aliasedUsers: { [key: string]: string };
-    
-	public canExecute(arg: CommandExecute): boolean {
-		return arg.author.id === '103347843934212096';
-	}
 
-	public async execute({ author, channel, args }: CommandExecute) {
+    public canExecute(arg: CommandExecute): boolean {
+        return arg.author.id === '103347843934212096';
+    }
+
+    public async execute({ author, channel, args }: CommandExecute) {
         if (args.length !== 2) {
             await channel.createMessage('usage: alias <name> <newAlias>');
             return;
@@ -50,7 +51,7 @@ export class Alias implements Command {
         }
 
         let idAlias = /^\d+$/.test(newAlias);
-        
+
         let removed = false;
         let existing: string[] = user.get(idAlias ? 'idAliases' : 'aliases');
         if ((existing).find(a => a === newAlias)) {
@@ -76,10 +77,10 @@ export class Alias implements Command {
             }
         }
 
-        
+
         user.set(idAlias ? 'idAliases' : 'aliases', existing);
         await user.save();
 
         await channel.createMessage(`${removed ? 'Removed' : 'Added'} '${newAlias}' as an ${idAlias ? 'ID' : ''} alias for '${user.name}'.`);
-	}
+    }
 }

@@ -9,6 +9,7 @@ const console = Loggr.get('C: List');
 export class List implements Command {
 	public api: ComponentAPI;
 	public name: string = 'List';
+	public desc: string = 'Gives a list of markovs: `[page]`';
 
 	public parent: Component = CommandHandler;
 

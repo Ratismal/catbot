@@ -19,6 +19,7 @@ const snekfetch = require('snekfetch');
 export class Populate implements Command {
 	public api: ComponentAPI;
 	public name: string = 'Populate';
+	public desc: string = 'Populates a markov from a file: `<name> <url>`';
 
 	public parent: Component = CommandHandler;
 	public plugins: string[] = ['Database', 'Sanitizer'];
