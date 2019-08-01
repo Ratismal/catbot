@@ -48,6 +48,7 @@ export class IconHandler {
 			emote = guild.emojis.find(e => e.name.toLowerCase() === name.toLowerCase());
 			if (emote) return [emote, guild];
 		}
+		return [null, null];
 	}
 
 	onLoad() {
