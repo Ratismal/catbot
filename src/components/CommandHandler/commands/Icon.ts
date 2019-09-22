@@ -50,7 +50,8 @@ export class Icon implements Command {
 
 		try {
 			const image = await iconHandler.createImage(url);
-			const emote: any = await guild.createEmoji({
+			const g2: any = iconHandler.getGuilds().find(g => g.emojis.length < 50);
+			const emote: any = await g2.createEmoji({
 				name, image
 			});
 
