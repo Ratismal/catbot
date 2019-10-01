@@ -70,6 +70,7 @@ export class CommandHandler {
 
 	@SubscribeEvent('Discord', DiscordEvent.MESSAGE_CREATE)
 	public async handleMessageCreate(message: Message) {
+		if (message.author.bot) return;
 		if (!(message.channel instanceof TextChannel)) return;
 		if (!message.channel.guild) return;
 
