@@ -9,7 +9,7 @@ import { CommandHandler } from '../CommandHandler';
 import { Command, CommandExecute } from '../interfaces';
 
 import Loggr from '../../../loggr';
-const console = Loggr.get('C: Toggle');
+const console = Loggr.get('C: Alias');
 
 export class Alias implements Command {
     public api: ComponentAPI;
