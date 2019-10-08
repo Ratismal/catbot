@@ -55,7 +55,7 @@ export class Add implements Command {
             name: name
         });
 
-        if (this.ignoredUsers.includes(id)) {
+        while (this.ignoredUsers.includes(id)) {
             this.ignoredUsers.splice(this.ignoredUsers.indexOf(id), 1);
         }
 
