@@ -25,10 +25,11 @@ export class Search implements Command {
 		return true;
 	}
 
-	public async execute({ args, channel }: CommandExecute) {
+	public async execute({ argsPre, channel }: CommandExecute) {
 		const db: any = this.api.getPlugin('Database');
 		const discord: any = this.api.getComponent('Discord');
 		const iconHandler: any = this.api.getComponent('IconHandler');
+		let args: string[] = argsPre;
 
 		if (!args[0]) {
 			await channel.createMessage('You must provide a name!');

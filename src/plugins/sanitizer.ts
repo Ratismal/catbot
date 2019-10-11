@@ -1,5 +1,5 @@
 const STRIP_MENTIONS = /<a?:.+:\d{17,23}>|<(@&?|#)\d{17,23}>|\d{17,}|(https?:\/\/)?(.+\.)?.+\..+(\/.+)\s|\{.+\}/gi;
-const STRIP = /[^a-z0-9\.,';!?\n\/ ]|(https?:\/\/.+(\s|$))/gi;
+const STRIP = /[^a-z0-9\.,';!?\n-\/ ]|(https?:\/\/.+(\s|$))/gi;
 const SKIP = /(^[^a-z0-9])|[{}]/gi;
 const PUNCTUATION = /([\.,;!?\(\)])/g;
 const TRIM_PUNCTUATION = /\s+([\.,;!?\(\)])/g;
