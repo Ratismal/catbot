@@ -29,7 +29,12 @@ export class Discord {
 			firstShardID: 0,
 			maxShards: 1,
 			restMode: true,
-			defaultImageFormat: 'png'
+			defaultImageFormat: 'png',
+			intents: [
+				'guilds',
+				'guildMembers',
+				'guildMessages'
+			]
 		});
 
 		this.api.forwardEvents(this.client, Object.values(DiscordEvent));
