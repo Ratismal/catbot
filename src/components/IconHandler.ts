@@ -122,7 +122,7 @@ export class IconHandler {
 			}
 			const emoteString: string = chunkedEmotes.map(emotes => emotes.join(' ')).join('\n');
 
-			const content = `**${guild.name}**: ${emotes.length} emote${emotes.length === 1 ? '' : 's'}\n${emoteString}`
+			const content = `**${guild.name}**: ${guild.emojis.length} emote${emotes.length === 1 ? '' : 's'}\n${emoteString}`
 			await this.client.editMessage(breakdownChannel, messageStorageMap[guild.id], content);
 		}
 	}
