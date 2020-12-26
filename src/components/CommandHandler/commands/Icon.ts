@@ -66,6 +66,7 @@ export class Icon implements Command {
 				await guild.deleteEmoji(oldEmote.id);
 				await discord.client.createMessage('792242766469267496', `<:emote:${emote.id}> 🔥 \`${guild.name}\``);
 			}
+			await iconHandler.breakdown();
 		} catch (err) {
 			console.error(err);
 			await channel.createMessage('I was unable to update your icon. Please send me a valid link to an image!');

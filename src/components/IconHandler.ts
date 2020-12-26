@@ -17,6 +17,14 @@ const console = Loggr.get('IconHandler');
 const snekfetch = require('snekfetch');
 const Jimp = require('jimp');
 
+const breakdownChannel = '792246302317477909';
+const messageStorageMap: { [key: string]: string } = {
+	'605825397535539204': '792246560695517184',
+	'605825809487364097': '792246574142980126',
+	'605825849492504595': '792246582187393055',
+	'605825885102276609': '792246590172692529'
+}
+
 export class IconHandler {
 	public api: ComponentAPI;
 
@@ -99,6 +107,17 @@ export class IconHandler {
 			lines.push(`> ${icon}  **${name}**`);
 			lines.push(`> ${text}`);
 			return lines.join('\n');
+		}
+	}
+
+	public async breakdown() {
+		const guilds = this.getGuilds();
+
+		for (const guild of guilds) {
+			const emotes = guild.emojis;
+
+			const content = `**${guild.name}**: ${emotes.length} emote${emotes.length === 1 ? '' : 's'}\n${emotes.map(e => `<:${e.name}:${e.id}>`).join(' ')}`
+			await this.client.editMessage(breakdownChannel, messageStorageMap[guild.id], content);
 		}
 	}
 }
