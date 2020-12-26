@@ -53,7 +53,7 @@ export class Icon implements Command {
 			const emote: any = await g2.createEmoji({
 				name, image
 			});
-			await discord.client.createMessage('792242766469267496', `<:emote:${emote.id}> ➡️ \`${g2.name}\``);
+			await discord.client.createMessage('792242766469267496', `<:${emote.name}:${emote.id}> ➡️ \`${g2.name}\``);
 
 			let old = '\u274c';
 			if (oldEmote) old = `<:old:${oldEmote.id}>`;
@@ -64,7 +64,7 @@ export class Icon implements Command {
 			await channel.createMessage(lines.join(' '));
 			if (oldEmote) {
 				await guild.deleteEmoji(oldEmote.id);
-				await discord.client.createMessage('792242766469267496', `<:emote:${emote.id}> 🔥 \`${guild.name}\``);
+				await discord.client.createMessage('792242766469267496', `<:${emote.name}:${emote.id}> 🔥 \`${guild.name}\``);
 			}
 			await iconHandler.breakdown();
 		} catch (err) {
