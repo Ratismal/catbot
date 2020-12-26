@@ -33,7 +33,8 @@ export class Discord {
 			intents: [
 				'guilds',
 				'guildMembers',
-				'guildMessages'
+				'guildMessages',
+				'guildEmojis'
 			]
 		});
 
