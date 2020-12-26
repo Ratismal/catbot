@@ -114,9 +114,15 @@ export class IconHandler {
 		const guilds = this.getGuilds();
 
 		for (const guild of guilds) {
-			const emotes = guild.emojis;
+			const emotes: string[] = guild.emojis.map(e => `<:${e.name}:${e.id}>`);
+			const chunkedEmotes: string[][] = [];
 
-			const content = `**${guild.name}**: ${emotes.length} emote${emotes.length === 1 ? '' : 's'}\n${emotes.map(e => `<:${e.name}:${e.id}>`).join(' ')}`
+			while (emotes.length > 0) {
+				chunkedEmotes.push(emotes.splice(0, 10));
+			}
+			const emoteString: string = chunkedEmotes.map(emotes => emotes.join(' ')).join('\n');
+
+			const content = `**${guild.name}**: ${emotes.length} emote${emotes.length === 1 ? '' : 's'}\n${emoteString}`
 			await this.client.editMessage(breakdownChannel, messageStorageMap[guild.id], content);
 		}
 	}
