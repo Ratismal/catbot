@@ -47,13 +47,13 @@ export class Icon implements Command {
 		if (message.attachments.length > 0) url = message.attachments[0].url;
 		else url = args[0] || duser.avatarURL;
 
-
 		try {
 			const image = await iconHandler.createImage(url);
 			const g2: any = iconHandler.getGuilds().find((g: any) => g.emojis.length < 50);
 			const emote: any = await g2.createEmoji({
 				name, image
 			});
+			await discord.client.createMessage('792242766469267496', `📩 <:emote:${emote.id}> ➡️ \`${g2.name}\``);
 
 			let old = '\u274c';
 			if (oldEmote) old = `<:old:${oldEmote.id}>`;
@@ -62,8 +62,10 @@ export class Icon implements Command {
 			];
 
 			await channel.createMessage(lines.join(' '));
-			if (oldEmote)
+			if (oldEmote) {
 				await guild.deleteEmoji(oldEmote.id);
+				await discord.client.createMessage('792242766469267496', `🪦 <:emote:${emote.id}> ➡️ \`${guild.name}\``);
+			}
 		} catch (err) {
 			console.error(err);
 			await channel.createMessage('I was unable to update your icon. Please send me a valid link to an image!');
