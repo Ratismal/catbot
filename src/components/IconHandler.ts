@@ -92,6 +92,8 @@ export class IconHandler {
 				name,
 				image: b64
 			});
+			await this.client.createMessage('792242766469267496', `<:${emote.name}:${emote.id}> ➡️ \`${guild.name}\``);
+			await this.breakdown();
 		}
 		return emote ? `<:${emote.name}:${emote.id}>` : '';
 	}
