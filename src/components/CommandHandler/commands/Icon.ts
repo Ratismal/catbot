@@ -63,8 +63,8 @@ export class Icon implements Command {
 
 			await channel.createMessage(lines.join(' '));
 			if (oldEmote) {
-				await guild.deleteEmoji(oldEmote.id);
 				await discord.client.createMessage('792242766469267496', `<:${oldEmote.name}:${oldEmote.id}> 🔥 \`${guild.name}\``);
+				await guild.deleteEmoji(oldEmote.id);
 			}
 			await iconHandler.breakdown();
 		} catch (err) {
