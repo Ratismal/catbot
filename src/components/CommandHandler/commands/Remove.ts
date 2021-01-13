@@ -11,7 +11,7 @@ import { Command, CommandExecute } from '../interfaces';
 import Loggr from '../../../loggr';
 const console = Loggr.get('C: Toggle');
 
-export class Add implements Command {
+export class Remove implements Command {
     public api: ComponentAPI;
     public name: string = 'Remove';
 
@@ -46,7 +46,8 @@ export class Add implements Command {
 
         const user = await db.findUser(args[0]);
         if (!user) {
-            return await channel.createMessage('not a user dummy');
+            await channel.createMessage('not a user dummy');
+            return;
         }
         const duser = await discord.getUser(user.userId);
         if (this.confirm !== user.userId) {
@@ -56,10 +57,11 @@ export class Add implements Command {
                     this.confirm = null;
                 }
             }, 60 * 1000);
-            return await channel.createMessage(`I hear you saying that you want me to delete ${duser.username}#${duser.discriminator} (${duser.id}).`
+            await channel.createMessage(`I hear you saying that you want me to delete ${duser.username}#${duser.discriminator} (${duser.id}).`
                 + '\n\nPlease be aware that this is a destructive operation with NO UNDO.'
                 + '\n\nContinuing will delete this user\'s:\n- logged messages\n- profile'
                 + '\n\nIf this is what you wanna do, run the command again.');
+            return;
         }
 
         await db.user_line.destroy({
