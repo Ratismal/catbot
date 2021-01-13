@@ -62,7 +62,6 @@ export class Add implements Command {
                 + '\n\nIf this is what you wanna do, run the command again.');
         }
 
-
         await db.user_line.destroy({
             where: {
                 userId: user.userId
