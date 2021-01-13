@@ -71,7 +71,9 @@ export class Remove implements Command {
         });
 
         await db.user.destroy({
-            userId: user.userId,
+            where: {
+                userId: user.userId,
+            }
         });
 
         while (this.loggedUsers.includes(user.userId)) {
