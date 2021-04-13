@@ -24,18 +24,17 @@ export class MarkovBuilder {
 	public dependencies: string[] = ['MarkovUpdater'];
 	public plugins: string[] = ['Database'];
 
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'loggedUsers' })
-	private loggedUsers: string[];
-	@Variable({ type: VariableDefinitionType.ARRAY, name: 'ignoredUsers' })
-	private ignoredUsers: string[];
-
 	private markovs: { [key: string]: any };
+	private markovExpiry: { [key: string]: number };
+	private interval: NodeJS.Timeout;
 
 	public getMarkov(userId: string) {
 		return this.markovs[userId];
 	}
 
 	public async getOrCreateMarkov(userId: string) {
+		this.markovExpiry[userId] = Date.now();
+
 		if (this.markovs[userId]) {
 			return this.markovs[userId];
 		}
@@ -44,9 +43,30 @@ export class MarkovBuilder {
 		return this.markovs[userId];
 	}
 
+	public unloadMarkov(userId: string) {
+		if (this.markovs[userId]) {
+			console.info('Unloading markov for', userId);
+			delete this.markovs[userId];
+		}
+	}
+
 	public async onLoad() {
 		this.markovs = {};
+		this.markovExpiry = {};
 		console.init('MarkovBuilder loaded.');
+		if (this.interval) {
+			clearInterval(this.interval);
+		}
+		this.interval = setInterval(this.checkExpiry.bind(this), 1000 * 15);
+	}
+
+	private checkExpiry() {
+		for (const userId of Object.keys(this.markovExpiry)) {
+			const diff = Date.now() - this.markovExpiry[userId];
+			if (diff >= 1000 * 60 * 10) { // unload markovs after 10 minutes of unuse
+				this.unloadMarkov(userId);
+			}
+		}
 	}
 
 	private seed(userId: string, line: string): Promise<void> {
