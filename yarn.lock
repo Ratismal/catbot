@@ -449,10 +449,12 @@ cat-loggr@^1.0.10:
     chalk "^2.4.1"
     moment "^2.22.2"
 
-cat-markov@^1.0.0:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/cat-markov/-/cat-markov-1.0.4.tgz#a597eaab3b88d629072fcf1ba8014cf53907e88b"
-  integrity sha512-vBfQHfARRCooDXA9MsxpunCVn3x01700bFRrGDZAhDzfZjfiIlMQciDjqGW6Z4XqmpyyS9oRn41JvIHq0Z+new==
+cat-markov@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cat-markov/-/cat-markov-1.1.0.tgz#26051b5faac06569c30d3ab93da4954ebd520118"
+  integrity sha512-/QUD7ZuUwr+/oUu96N+AO7tAB8GMV0rBTe7/o21bPzWS4xpxhCRcoqM+htX6qABHQnAAlNo2OiffaP6TIDzn5A==
+  dependencies:
+    gaussian "^1.2.0"
 
 catflake@^1.0.0:
   version "1.0.0"
@@ -806,6 +808,11 @@ function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
   integrity sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==
+
+gaussian@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/gaussian/-/gaussian-1.2.0.tgz#5b081744008c1b0a8eb510da695ed7328fb8913a"
+  integrity sha512-Pz/InFmDZ6VqCbXF+2+O6USIbPUPWhJ7DnqrZKfo9mMHszCd4pBad3WCVa9ruzzrBizYonsv0ZBmuv4rR8NRQg==
 
 generic-pool@^3.4.0:
   version "3.5.0"

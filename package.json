@@ -22,7 +22,7 @@
   "dependencies": {
     "@ayana/bento": "^1.0.0-alpha.14",
     "cat-loggr": "^1.0.10",
-    "cat-markov": "^1.0.0",
+    "cat-markov": "1.1.0",
     "catflake": "^1.0.0",
     "eris": "^0.14.0",
     "jimp": "^0.6.4",

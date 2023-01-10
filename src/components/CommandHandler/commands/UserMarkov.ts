@@ -41,7 +41,7 @@ export class UserMarkov implements Command {
 			const builder = this.api.getComponent<MarkovBuilder>(MarkovBuilder);
 			const markov = await builder.getOrCreateMarkov(user.userId);
 			// console.log(markov);
-			const keys = markov.create(3, 15);
+			const keys = markov.createGaus(3, 15);
 			// const statement = markov.markov.fill(key, 20);
 			// console.log(key, statement);
 			await channel.createMessage(await iconHandler.getOutput(user, duser, keys.join(' ')));
