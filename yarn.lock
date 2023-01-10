@@ -449,10 +449,10 @@ cat-loggr@^1.0.10:
     chalk "^2.4.1"
     moment "^2.22.2"
 
-cat-markov@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/cat-markov/-/cat-markov-1.1.0.tgz#26051b5faac06569c30d3ab93da4954ebd520118"
-  integrity sha512-/QUD7ZuUwr+/oUu96N+AO7tAB8GMV0rBTe7/o21bPzWS4xpxhCRcoqM+htX6qABHQnAAlNo2OiffaP6TIDzn5A==
+cat-markov@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/cat-markov/-/cat-markov-1.1.1.tgz#3b643c280f2858c16c44d8e2281ed4617f57650a"
+  integrity sha512-euzB62C6S/8dPo5XAe262N5xi2kDbffpJTQGyLCpyAFUR/MCf9gUEDVIPIKeD4oh9nLN4TYgpR098B6TSuI8zA==
   dependencies:
     gaussian "^1.2.0"
 
